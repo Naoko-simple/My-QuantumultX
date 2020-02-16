@@ -46,21 +46,18 @@ if (url.indexOf(path2) != -1) {
 
         requestPrice(shareUrl, function (data) {
             if (data) {
-                let historyItem = customItem()
+                
                 if (data.ok == 1 && data.single) {
                     const lower = lowerMsgs(data.single)
                     const tbitems = priceSummary(data)
                     const tip = data.PriceRemark.Tip
                     service.items = service.items.concat(nonService.items)
-                    historyItem.desc = `${lower[0]} ${tip}` + "（仅供参考）"
-                    historyItem.title = lower[1]
-                    service.items.unshift(historyItem)
+                    service.items.unshift(customItem(lower[1],`${lower[0]} ${tip}` +"（仅供参考）"))
                     nonService.title = "价格详情"
                     nonService.items = tbitems
                 }
                 if (data.ok == 0 && data.msg.length > 0) {
-                    historyItem.desc = data.msg
-                    service.items.push(historyItem)
+                    service.items.unshift(customItem("历史价格",data.msg))
                 }
                 apiStack.value = JSON.stringify(value)
                 $done({ body: JSON.stringify(obj) })
