@@ -58,6 +58,7 @@ function getinfo() {
   chavy.log(`${cookieName}, getinfo - tel: ${tel}`)
   chavy.get(url, (error, response, data) => (signinfo.info = data))
 }
+
 function getdetail() {
   const url = { url: `https://mina.10010.com/wxapplet/bind/getCombospare/alipay/alipaymini?stoken=&user_id=${gettel()}` }
   chavy.get(url, (error, response, data) => (signinfo.detail = data))
