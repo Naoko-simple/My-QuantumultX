@@ -46,6 +46,7 @@ if (url.indexOf(path1) != -1) {
 }
 
 if (url.indexOf(path2) != -1) {
+    const body = $response.body
     $done({ body })
     const obj = JSON.parse(body)
     let item = obj.data.item
