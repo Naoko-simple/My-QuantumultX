@@ -4,10 +4,9 @@ DOMAIN,world-gen.g.aaplimg.com
 DOMAIN,mesu.apple.com
 DOMAIN,gdmf.apple.com
 DOMAIN,www.gdmf.apple.com
-DOMAIN,ppq.apple.com
 DOMAIN,iadsdk.apple.com
 DOMAIN,googleads.g.doubleclick.net
 DOMAIN,googletagservices.com
 DOMAIN,stats.g.doubleclick.net
 DOMAIN,adclick.g.douclick.net
-USER-AGENT,com.apple.trustd/*
+USER-AGENT,com.apple.trustd/*
