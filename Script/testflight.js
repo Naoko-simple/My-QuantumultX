@@ -134,9 +134,11 @@ const title = 'testfilght';
 const url = "https://testflight.apple.com/join/";
 
 //填入要监测的appkey。从testfligt地址获取。
-const appkey = "VCIvwk2g,VCIvwk2g,SHQFznkM,oV5HiCSz";
+//例如"VCIvwk2g,wArXdacJ,2vnRvOTX,LzjySbQx,IdFRwmNy,qDkBu2ur,4Qt2lIm5,ZzqOu8tX,ftCqFe6D,fy7LvHVA,QKqitFwc"
+
+const appkey="VCIvwk2g";
 const fullstr = 'This beta is full';
-const appnamereg = /<span>请在 iPhone 或 iPad 中安装 TestFlight 以加入 Beta 版"(.+)"测试。<\/span>/;
+const appnamereg = /<span>请在 iPhone 或 iPad 中安装 TestFlight 以加入 Beta 版“(.+)”测试。<\/span>/;
 var proarray = new Array();
 getResult();
 
@@ -149,6 +151,8 @@ function getResult() {
 
     console.log(apps.length);
     for (var i = 0; i < apps.length; i++) {
+    
+     var p = new Promise(function (resolve) {
         var lol = {
             url: url + apps[i],
             headers: {
@@ -156,7 +160,7 @@ function getResult() {
             },
         };
         console.log(i+'begin');
-        var p = new Promise(function (resolve) {
+       
         $httpClient.get(lol, function (error, response, data) {
             console.log(data.indexOf(fullstr));
             try{
@@ -165,9 +169,9 @@ function getResult() {
                 appnamereg.test(data);
                 var appname = appnamereg.exec(data);
                 if (!appname != null) {
-                    var reg = /".+"/
+                    var reg = /“.+”/
                     var item = reg.exec(appname[0]);
-                    var name=item[0].replace('"', '').replace('"', '');
+                    var name=item[0].replace('“', '').replace('”', '');
                     resultstr = resultstr + '[' + name + ']' + upstr + '👉:' + lol.url + '\n'
                 }
             }
@@ -185,11 +189,12 @@ function getResult() {
     }
     Promise.all(proarray).then((result) => {
         if(resultstr==''){
-            $notification.post(title, '', '暂无车位');
+           console.log('暂无车位');
         }
         else{
+        
         $notification.post(title, '', resultstr);
-        }
+    }
     }).catch((error) => {
         console.log(error)
     });
