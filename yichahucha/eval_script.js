@@ -31,14 +31,12 @@ const __conf = String.raw`
 
 [remote]
 https://raw.githubusercontent.com/yichahucha/surge/master/sub_script.conf
-
 //custom remote...
 
 
 [local]
 //jd
 //^https?://api\.m\.jd\.com/client\.action\?functionId=(wareBusiness|serverConfig) eval https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
-
 //custom local...
 
 
@@ -47,6 +45,7 @@ https://raw.githubusercontent.com/yichahucha/surge/master/sub_script.conf
 const __tool = new ____Tool()
 const __isTask = __tool.isTask
 const __log = false
+const __debug = false
 
 if (__isTask) {
     const downloadFile = (url) => {
@@ -231,15 +230,24 @@ function ____parseConf(conf) {
                     remote = value[1].replace(/\s/g, "")
                     match = value[0].replace(/\s/g, "")
                 }
-                confObj[remote] = match
+                if (remote.length > 0 && match.length > 0) {
+                    confObj[remote] = match
+                } else {
+                    if (__debug) ____throwConfError(line)
+                }
             } else {
-                __tool.notify("Configuration error", "", line)
-                throw "Configuration error:" + line
+                if (__debug) ____throwConfError(line)
             }
         }
     })
-    console.log(`Configuration information:  ${JSON.stringify(confObj)}`)
+    console.log(`Conf information:  ${JSON.stringify(confObj)}`)
     return confObj
+}
+
+function ____throwConfError(line) {
+    __tool.notify("Conf error", "", line)
+    $done()
+    throw new Error(`Conf error: ${line}`)
 }
 
 function ____Tool() {
