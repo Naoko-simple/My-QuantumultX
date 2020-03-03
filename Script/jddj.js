@@ -2,7 +2,7 @@ const cookieName ='京东到家'
 const cookieKey = 'chen_cookie_dj'
 const chen = init()
 
-const cookieVal = 'B22941CC-1C91-4183-8478-3DBFB9B5076D'
+const cookieVal = 'Cookie自己抓'
 sign()
 function sign() {
     let url = {url: 'https://daojia.jd.com/client?functionId=signin%2FuserSigninNew&body=%7B%7D',

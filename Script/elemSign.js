@@ -53,7 +53,7 @@ const cookieName = '饿了么'
 const cookieKey = 'cookie_elem'
 const UserId='user_id_elem'
 const sy = init()
-var cookieVal =sy.getdata(cookieKey);
+var cookieVal = sy.getdata(cookieKey);
 var regx=/USERID=\d+/;
 
 var userid=cookieVal.match(regx)[0];

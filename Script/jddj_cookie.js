@@ -27,7 +27,7 @@ cookie失效时间未知
 const cookieName = '京东到家'
 const cookieKey = 'chen_cookie_dj'
 const chen = init()
-const cookieVal = $request.headers['Cookie']
+const cookieVal = $request.headers['B22941CC-1C91-4183-8478-3DBFB9B5076D']
 if (cookieVal) {
   if (chen.setdata(cookieVal, cookieKey)) {
     chen.msg(`${cookieName}`, '获取Cookie: 成功', '')
