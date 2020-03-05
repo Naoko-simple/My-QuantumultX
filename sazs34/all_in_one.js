@@ -6,9 +6,9 @@ const global = {
         iqiyi: false,
         _52pojie: true,
         netease_music: true,
-        v2ex: true,
+        v2ex: false,
         china_telecom: false,
-        rrtv: true,
+        rrtv: false,
         eleme: false
     },
     data: {
