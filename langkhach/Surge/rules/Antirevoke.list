@@ -9,4 +9,4 @@ DOMAIN,googleads.g.doubleclick.net
 DOMAIN,googletagservices.com
 DOMAIN,stats.g.doubleclick.net
 DOMAIN,adclick.g.douclick.net
-USER-AGENT,com.apple.trustd/*
+USER-AGENT,com.apple.trustd/*
