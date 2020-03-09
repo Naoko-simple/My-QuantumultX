@@ -13,9 +13,9 @@
 api.dushu.io
 
 [Script]
-http-request ^https://api\.dushu\.io/CheckIn script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pandeng/pandeng.cookie.js, requires-body=true
+http-request ^https://api\.dushu\.io/CheckIn script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/fandeng/fandeng.cookie.js, requires-body=true
 
-cron "10 0 0 * * *" script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pandeng/pandeng.js
+cron "10 0 0 * * *" script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/fandeng/fandeng.js
 ```
 
 ## 配置 (QuanX)
@@ -30,10 +30,10 @@ api.dushu.io
 # 不支持
 
 # [TestFlight] QuanX v1.0.6-build195 及以后版本
-^https://api\.dushu\.io/CheckIn url script-request-body https://raw.githubusercontent.com/chavyleung/scripts/master/pandeng/pandeng.cookie.js
+^https://api\.dushu\.io/CheckIn url script-request-body https://raw.githubusercontent.com/chavyleung/scripts/master/fandeng/fandeng.cookie.js
 
 [task_local]
-1 0 * * * pandeng.js
+1 0 * * * fandeng.js
 ```
 
 ## 说明
@@ -41,7 +41,7 @@ api.dushu.io
 1. 先把`api.dushu.io`加到`[MITM]`
 2. 再配置重写规则:
    - Surge: 把两条远程脚本放到`[Script]`
-   - QuanX: 把`pandeng.cookie.js`和`pandeng.js`传到`On My iPhone - Quantumult X - Scripts` (传到 iCloud 相同目录也可, 注意要打开 quanx 的 iCloud 开关)
+   - QuanX: 把`fandeng.cookie.js`和`fandeng.js`传到`On My iPhone - Quantumult X - Scripts` (传到 iCloud 相同目录也可, 注意要打开 quanx 的 iCloud 开关)
 3. 打开 APP 手动签到一次: 访问下右下角 `我的` > `签到`
 4. 系统提示: `获取Cookie: 成功`
 5. 把获取 Cookie 的脚本注释掉
