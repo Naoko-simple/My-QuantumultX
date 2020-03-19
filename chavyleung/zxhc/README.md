@@ -1,4 +1,4 @@
-# 网易考拉(弃坑)
+#  智行火车票
 
 > 代码已同时兼容 Surge & QuanX, 使用同一份签到脚本即可
 
@@ -10,39 +10,40 @@
 
 ```properties
 [MITM]
-m-bean.kaola.com
+m.ctrip.com
 
 [Script]
-http-request ^https:\/\/m-bean\.kaola\.com/m/point/sign\.html script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wykl/wykl.cookie.js, requires-body=true
+http-request ^https:\/\/m\.ctrip\.com/restapi/soa2/14593/json/attendanceDay? script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zxhc/zxhc.cookie.js, requires-body=true
 
-cron "10 0 0 * * *" script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wykl/wykl.js
+cron "10 0 0 * * *" script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zxhc/zxhc.js
 ```
 
 ## 配置 (QuanX)
 
 ```properties
 [MITM]
-m-bean.kaola.com
+m.ctrip.com
 
 [rewrite_local]
-
-# [商店版] QuanX v1.0.6-build194 及更早版本
-# ^https:\/\/m-bean\.kaola\.com/m/point/sign\.html url script-request-body wykl.cookie.js
-
-# [TestFlight] QuanX v1.0.6-build195 及以后版本
-^https:\/\/m-bean\.kaola\.com/m/point/sign\.html url script-request-body https://raw.githubusercontent.com/chavyleung/scripts/master/wykl/wykl.cookie.js
+#&QuanX
+^https:\/\/m\.ctrip\.com/restapi/soa2/14593/json/attendanceDay? url script-request-body chavyleung/zxhc/zxhc.cookie.js
+# QuanTF
+^https:\/\/m\.ctrip\.com/restapi/soa2/14593/json/attendanceDay? url script-request-body https://raw.githubusercontent.com/chavyleung/scripts/master/zxhc/zxhc.cookie.js
 
 [task_local]
-1 0 * * * wykl.js
+1 0 * * * zxhc.js
+
+[task_remote]
+1 0 * * * https://raw.githubusercontent.com/chavyleung/scripts/master/zxhc/zxhc.js
 ```
 
 ## 说明
 
-1. 先把`m-bean.kaola.com`加到`[MITM]`
+1. 先把`m.ctrip.com`加到`[MITM]`
 2. 再配置重写规则:
    - Surge: 把两条远程脚本放到`[Script]`
-   - QuanX: 把`wykl.cookie.js`和`wykl.js`传到`On My iPhone - Quantumult X - Scripts` (传到 iCloud 相同目录也可, 注意要打开 quanx 的 iCloud 开关)
-3. 打开 APP 手动签到一次: 访问下右下角 `我的考拉` > `领考拉豆` > `签到`
+   - QuanX: 把`zxhc.cookie.js`和`zxhc.js`传到`On My iPhone - Quantumult X - Scripts` (传到 iCloud 相同目录也可, 注意要打开 quanx 的 iCloud 开关)
+3. 打开 APP 手动签到一次: 访问下右下角 `个人中心` > `签到`
 4. 系统提示: `获取Cookie: 成功`
 5. 把获取 Cookie 的脚本注释掉
 6. 运行一次脚本, 如果提示重复签到, 那就算成功了!
