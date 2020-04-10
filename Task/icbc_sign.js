@@ -1,40 +1,33 @@
-const cookieName ='京东到家'
-const cookieKey = 'chen_cookie_dj'
+
+const cookieName = '工商e生活签到'
+const bodyKey = 'chen_body_icbc'
+const headerKey = 'chen_header_icbc'
 const chen = init()
-const cookieVal = chen.getdata(cookieKey);
+let bodyVal = chen.getdata(bodyKey)
+let headerVal = chen.getdata(headerKey)
 sign()
 function sign() {
-    let url = {url: 'https://daojia.jd.com/client?functionId=signin%2FuserSigninNew&body=%7B%7D',
-    headers: { Cookie:cookieVal}}
-   
-    chen.get(url, (error, response, data) => {
-      chen.log(`${cookieName}, data: ${data}`)
-      let result = JSON.parse(data)
-      
-      const title = `${cookieName}`
-      let subTitle = ``
-      let detail = ``
-    
-      if (result.code == 0) {
-        subTitle = `签到结果:   成功`
-        detail = `获取鲜豆：${result.result.points}`
-      } else if(result.code==201){
-        subTitle = `签到结果: 失败`
-        detail = `说明: 未登录`
-      } else if(result.code==-1){
-        subTitle = `签到结果：重复签到`
-        detail = `说明: ${result.msg}`
-      }else {
-        subTitle = `签到结果: 未知`
-        detail = `说明: ${result.msg}`
-      }
-      chen.msg(title, subTitle, detail)
-      chen.log(`返回结果代码:${result.code}，返回信息:${result.msg}`)
-    })
-    chen.done()
+    let url = {url: 'https://icbc1.wlphp.com:8444/js/api/index/signIn',headers: JSON.parse(headerVal),body: bodyVal}
+    chen.post(url, (error, response, data) => {
+        chen.log(`${cookieName}, data: ${data}`)
+        const result = JSON.parse(data)
+        let subTitle = ``
+        let detail = ``
+        if (result.RETCODE == 0) {
+          subTitle = `签到结果: 成功`
+          detail = `获得：${result.DATA.signinScore}积分，总积分${result.DATA.score},连续签到：${result.DATA.signinDays}天`
+        } else if (result.RETCODE == 81000004) {
+          subTitle = `签到结果: 成功 (重复签到)`
+          detail = `说明: ${result.DATA}`
+        } else {
+          subTitle = `签到结果: 失败`
+          detail = `说明: ${result.errmsg}`
+        }
+        chen.msg(cookieName, subTitle, detail)
+        chen.done()
+      })
     }
-
-  function init() {
+function init() {
     isSurge = () => {
       return undefined === this.$httpClient ? false : true
     }
@@ -77,3 +70,4 @@ function sign() {
     }
     return { isSurge, isQuanX, msg, log, getdata, setdata, get, post, done }
   }
+  chen.done()
