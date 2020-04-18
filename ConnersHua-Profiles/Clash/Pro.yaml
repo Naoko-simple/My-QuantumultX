@@ -699,6 +699,7 @@ Rule:
 - DOMAIN-SUFFIX,pbs.org,GlobalMedia
 # > Pornhub
 - DOMAIN-SUFFIX,phncdn.com,GlobalMedia
+- DOMAIN-SUFFIX,phprcdn.com,GlobalMedia
 - DOMAIN-SUFFIX,pornhub.com,GlobalMedia
 - DOMAIN-SUFFIX,pornhubpremium.com,GlobalMedia
 # > 台湾好
@@ -789,12 +790,16 @@ Rule:
 - DOMAIN-SUFFIX,telegra.ph,PROXY
 - DOMAIN-SUFFIX,telegram.me,PROXY
 - DOMAIN-SUFFIX,telegram.org,PROXY
+- DOMAIN-SUFFIX,telesco.pe,PROXY
 - IP-CIDR,91.108.4.0/22,PROXY,no-resolve
 - IP-CIDR,91.108.8.0/22,PROXY,no-resolve
 - IP-CIDR,91.108.12.0/22,PROXY,no-resolve
 - IP-CIDR,91.108.16.0/22,PROXY,no-resolve
 - IP-CIDR,91.108.56.0/22,PROXY,no-resolve
 - IP-CIDR,149.154.160.0/20,PROXY,no-resolve
+- IP-CIDR,2001:b28:f23d::/48,PROXY,no-resolve
+- IP-CIDR,2001:b28:f23f::/48,PROXY,no-resolve
+- IP-CIDR,2001:67c:4e8::/48,PROXY,no-resolve
 # > Line
 - DOMAIN-SUFFIX,line.me,PROXY
 - DOMAIN-SUFFIX,line-apps.com,PROXY
@@ -1027,6 +1032,7 @@ Rule:
 - DOMAIN-SUFFIX,redbubble.com,PROXY
 - DOMAIN-SUFFIX,reddit.com,PROXY
 - DOMAIN-SUFFIX,redditmedia.com,PROXY
+- DOMAIN-SUFFIX,redditstatic.com,PROXY
 - DOMAIN-SUFFIX,resilio.com,PROXY
 - DOMAIN-SUFFIX,reuters.com,PROXY
 - DOMAIN-SUFFIX,reutersmedia.net,PROXY
@@ -1676,16 +1682,19 @@ Rule:
 - DOMAIN-SUFFIX,zhuihd.com,DIRECT
 - DOMAIN,download.jetbrains.com,DIRECT
 - DOMAIN,images-cn.ssl-images-amazon.com,DIRECT
+- DOMAIN,cdn.angruo.com,DIRECT
 
 # > Apple
 - DOMAIN-SUFFIX,aaplimg.com,Apple
 - DOMAIN-SUFFIX,apple.co,Apple
 - DOMAIN-SUFFIX,apple.com,Apple
+- DOMAIN-SUFFIX,apple.com.cn,Apple
 - DOMAIN-SUFFIX,apple-cloudkit.com,Apple
 - DOMAIN-SUFFIX,appstore.com,Apple
 - DOMAIN-SUFFIX,cdn-apple.com,Apple
 - DOMAIN-SUFFIX,crashlytics.com,Apple
 - DOMAIN-SUFFIX,icloud.com,Apple
+- DOMAIN-SUFFIX,icloud.com.cn,Apple
 - DOMAIN-SUFFIX,icloud-content.com,Apple
 - DOMAIN-SUFFIX,me.com,Apple
 - DOMAIN-SUFFIX,mzstatic.com,Apple
