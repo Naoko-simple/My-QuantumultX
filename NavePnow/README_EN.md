@@ -1,9 +1,15 @@
-# Profiles
-[![](https://img.shields.io/github/stars/NavePnow/Profiles.svg)](https://github.com/NavePnow/Profiles) [![](https://img.shields.io/github/forks/NavePnow/Profiles.svg)](https://github.com/NavePnow/Profiles) [![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/) [![Generic badge](https://img.shields.io/badge/Telegram-Channel-blue.svg)](https://t.me/Leped_Channel) [![Generic badge](https://img.shields.io/badge/Telegram-Feedback-blue.svg)](https://t.me/Leped_Bot) [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) [![](https://cdn.jsdelivr.net/gh/NavePnow/blog_photo@private/chinese.svg)](https://github.com/NavePnow/Profiles/blob/master/README.md)
+<p align="center">
+<img src="https://cdn.jsdelivr.net/gh/NavePnow/blog_photo@private/trans123.png" alt="Evan" width="200">
+</p>
+<h1 align="center">Profiles</h1>
+
+[![Generic badge](https://img.shields.io/badge/dynamic/json?color=lightgray&label=Followers&query=%24.data.totalSubs&url=https%3A%2F%2Fapi.spencerwoo.com%2Fsubstats%2F%3Fsource%3Dgithub%26queryKey%3DNavePnow&logo=github)](https://t.me/Leped_Channel) [![](https://img.shields.io/github/stars/NavePnow/Profiles.svg?logo=github&color=lightgrey)](https://github.com/NavePnow/Profiles) [![](https://img.shields.io/github/forks/NavePnow/Profiles.svg?logo=github&color=lightgrey)](https://github.com/NavePnow/Profiles) [![Generic badge](https://img.shields.io/badge/dynamic/json?color=blue&label=Channel&query=%24.data.totalSubs&url=https%3A%2F%2Fapi.spencerwoo.com%2Fsubstats%2F%3Fsource%3Dtelegram%26queryKey%3DLeped_Channel&logo=telegram)](https://t.me/Leped_Channel) [![Generic badge](https://img.shields.io/badge/Bot-Feedback-blue.svg?logo=telegram)](https://t.me/Leped_Bot) [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) [![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/) 
 
 [![ForTheBadge built-with-love](http://ForTheBadge.com/images/badges/built-with-love.svg)](https://GitHub.com/NavePnow)
 
 📖 [文档](https://github.com/NavePnow/Profiles/blob/master/README.md) | 📖 Docs
+
+[![](https://cdn.jsdelivr.net/gh/NavePnow/blog_photo@private/chinese.svg)](https://github.com/NavePnow/Profiles/blob/master/README.md)
 
 Table of Contents
 =================
@@ -68,7 +74,7 @@ Table of Contents
 <img src="https://cdn.jsdelivr.net/gh/NavePnow/blog_photo@private/IMAGE 2019-11-12 19:58:49.jpg" height="40%" width="40%">
 Auto check-in for 1point3acres.com
 
-[Tutorial](https://nave.work/%E4%B8%80%E4%BA%A9%E4%B8%89%E5%88%86%E5%9C%B0%E8%87%AA%E5%8A%A8%E7%AD%BE%E5%88%B0%E8%84%9A%E6%9C%AC.html)
+[Tutorial](https://medium.com/navepnow/一亩三分地自动签到脚本-c718734111ac)
 
 #### 10010+.js/10010+_qx.js
 **By [NavePnow](https://github.com/NavePnow)**
@@ -123,7 +129,7 @@ Modified according to the Jsbox script from author [coo11](https://t.me/coo11)
 <img src="https://cdn.jsdelivr.net/gh/NavePnow/blog_photo@private/IMG_1189.JPG" height="40%" width="40%">
 Auto check-in for Weibo Super_Talk
 
-[Tutorial](https://nave.work/微博超话自动签到脚本.html)
+[Tutorial](https://medium.com/navepnow/微博超话自动签到脚本-4826bff2112c)
 
 ### Google Apps Script
 
