@@ -5,7 +5,7 @@ const global = {
         baidu_tieba: true,
         iqiyi: false,
         _52pojie: true,
-        netease_music: true,
+        netease_music: false,
         v2ex: false,
         china_telecom: false,
         rrtv: false,
