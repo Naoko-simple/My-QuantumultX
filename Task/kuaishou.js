@@ -11,18 +11,20 @@ by Macsuny
 @Chavy
 @Nobyda
 ~~~~~~~~~~~~~~~~
+
 Surge 4.0 :
 [Script]
-cron "0 9 * * *" script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/kuaishou.js
+快手极速版 = type=cron,cronexp=35 5 0 * * *,script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/kuaishou.js,script-update-interval=0
+
 # 获取快手极速版 Cookie.
-http-request https:\/\/nebula\.kuaishou\.com\/rest\/n\/nebula\/activity\/earn\/overview script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/kuaishou.js
+快手极速版 = type=http-request,pattern=https:\/\/nebula\.kuaishou\.com\/rest\/n\/nebula\/activity\/earn\/overview,script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/kuaishou.js
+
 ~~~~~~~~~~~~~~~~
 QX 1.0.7+ :
 [task_local]
 0 9 * * * kuaishou.js
 
 [rewrite_local]
-# Get bilibili cookie. QX 1.0.5(188+):
 https:\/\/nebula\.kuaishou\.com\/rest\/n\/nebula\/activity\/earn\/overview url script-request-header kuaishou.js
 ~~~~~~~~~~~~~~~~
 QX or Surge MITM = nebula.kuaishou.com
