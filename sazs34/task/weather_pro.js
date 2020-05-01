@@ -3,7 +3,7 @@
 https://github.com/sazs34/TaskConfig/blob/master/assets/weather_pro.md
  */
 let config = {
-    darksky_api: "b089f565812416bc9f507d013434c947", //从https://darksky.net/dev/ 上申请key填入即可
+    darksky_api: "db79912c7f716548829b50aab01ed17e", //从https://darksky.net/dev/ 上申请key填入即可
     aqicn_api: "df8924acde3f31bc7e47a6b91258aca9c4c46e5f", //从http://aqicn.org/data-platform/token/#/ 上申请key填入即可
     huweather_apiKey: "6f92b94c86384062b930ab1f24d05641", //和风天气APIkey,可自行前往 https://dev.heweather.com/ 进行获取(注意key类型选WebApi)
     lat_lon: "113.828307,34.537706", //请填写经纬度,直接从谷歌地图中获取即可
