@@ -37,7 +37,8 @@ let VAL_runflag = chavy.getdata(KEY_runflag)
   if (VAL_signweburl || VAL_signweburlBarry) await signweb(), await getwebinfo()
   if (VAL_signgameurl && VAL_signgetgameurl) await signgame(), await getgameinfo()
   showmsg()
-})().catch((e) => chavy.log(`❌ ${cookieName} 签到失败: ${e}`))
+  chavy.done()
+})().catch((e) => chavy.log(`❌ ${cookieName} 签到失败: ${e}`), chavy.done())
 
 function loginapp() {
   return new Promise((resolve, reject) => {
@@ -260,7 +261,9 @@ function showmsg() {
     if (signinfo.gameinfo.data.resultCode == 0000) {
       moreDetail += moreDetail == '' ? '' : '\n'
       moreDetail += '\n💰 天天低价: '
-      for (d of signinfo.gameinfo.data.result.datas) moreDetail += `\n${d.obj.couponRuleName} (${d.obj.remainValue}元)`
+      for (d of signinfo.gameinfo.data.result.datas)
+        if (d.obj) moreDetail += `\n${d.obj.couponRuleName} (${d.obj.remainValue}元)`
+        else moreDetail += `\n${d.basePrizeEntity.prizeName} (${d.basePrizeEntity.prizeRules})`
     } else {
       chavy.log(`❌ ${cookieName} showmsg - 天天低价 - gameinfo: ${JSON.stringify(signinfo.gameinfo)}`)
     }
