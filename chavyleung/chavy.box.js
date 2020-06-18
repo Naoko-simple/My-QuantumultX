@@ -64,6 +64,12 @@ function getSystemCfgs() {
       id: 'Orz-3',
       icon: 'https://raw.githubusercontent.com/Orz-3/task/master/Orz-3.png',
       repo: 'https://github.com/Orz-3/'
+    },
+    boxjs: {
+      id: 'BoxJs',
+      show: false,
+      icon: 'https://raw.githubusercontent.com/Orz-3/task/master/box.png',
+      repo: 'https://github.com/chavyleung/scripts'
     }
   }
 }
@@ -261,6 +267,15 @@ function getSystemApps() {
       author: '@Sunert',
       repo: 'https://github.com/Sunert/Scripts/blob/master/Task/txnews.js',
       icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/txnews.png', 'https://raw.githubusercontent.com/Orz-3/task/master/txnews.png']
+    },
+    {
+      id: 'BoxSwitcher',
+      name: '会话切换',
+      keys: [],
+      settings: [{ id: 'CFG_BoxSwitcher_isSilent', name: '静默运行', val: false, type: 'boolean', desc: '切换会话时不发出系统通知!' }],
+      author: '@chavyleung',
+      repo: 'https://github.com/chavyleung/scripts/blob/master/box/switcher/box.switcher.js',
+      icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/box.png', 'https://raw.githubusercontent.com/Orz-3/task/master/box.png']
     }
   ]
   sysapps
@@ -402,8 +417,8 @@ function handleApi() {
   }
 }
 
-function handleApp(appId) {
-  const box = {
+function getBoxData() {
+  return {
     sessions: getSessions(),
     sysapps: getSystemApps(),
     userapps: getUserApps(),
@@ -411,23 +426,27 @@ function handleApp(appId) {
     usercfgs: getUserCfgs(),
     colors: getSystemThemes()
   }
+}
+
+function handleApp(appId) {
+  const box = getBoxData()
   const curapp = appId ? box.sysapps.find((app) => app.id === appId) : null
   $.html = printHtml(JSON.stringify(box), JSON.stringify(curapp))
-  console.log($.html)
+  if (box.usercfgs.isDebugFormat) {
+    console.log(printHtml(`'\${data}'`, `'\${curapp}'`))
+  } else if (box.usercfgs.isDebugData) {
+    console.log($.html)
+  }
 }
 
 function handleHome() {
-  $.html = printHtml(
-    JSON.stringify({
-      sessions: getSessions(),
-      sysapps: getSystemApps(),
-      userapps: getUserApps(),
-      syscfgs: getSystemCfgs(),
-      usercfgs: getUserCfgs(),
-      colors: getSystemThemes()
-    })
-  )
-  console.log($.html)
+  const box = getBoxData()
+  $.html = printHtml(JSON.stringify(box))
+  if (box.usercfgs.isDebugFormat) {
+    console.log(printHtml(`'\${data}'`, `'\${curapp}'`))
+  } else if (box.usercfgs.isDebugData) {
+    console.log($.html)
+  }
 }
 
 function printHtml(data, curapp = null) {
@@ -437,9 +456,9 @@ function printHtml(data, curapp = null) {
     <head>
       <title>BoxJs</title>
       <meta charset="utf-8" />
-      <link rel="Bookmark" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png">
-      <link rel="shortcut icon" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png">
-      <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png"/> 
+      <link rel="Bookmark" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
+      <link rel="shortcut icon" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
+      <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
       <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
       <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet" />
       <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
@@ -447,7 +466,7 @@ function printHtml(data, curapp = null) {
     </head>
     <body>
       <div id="app">
-        <v-app>
+        <v-app v-scroll="onScroll">
           <v-app-bar :color="ui.appbar.color" app dense>
             <v-menu bottom left v-if="['app', 'home', 'log', 'data'].includes(ui.curview) && box.syscfgs.env === ''">
               <template v-slot:activator="{ on }">
@@ -462,7 +481,7 @@ function printHtml(data, curapp = null) {
             <v-menu bottom left v-else-if="['app', 'home', 'log', 'data'].includes(ui.curview) && box.syscfgs.env !== ''">
               <template v-slot:activator="{ on }">
                 <v-btn icon v-on="on">
-                  <v-avatar size="24">
+                  <v-avatar size="26">
                     <img :src="box.syscfgs.envs.find(e=>e.id===box.syscfgs.env).icon" alt="box.syscfgs.env" />
                   </v-avatar>
                 </v-btn>
@@ -477,11 +496,31 @@ function printHtml(data, curapp = null) {
             <v-btn icon @click="ui.curview = ui.bfview" v-else><v-icon>mdi-chevron-left</v-icon></v-btn>
             <v-autocomplete :label="ui.curapp ? ui.curapp.name + ' ' + ui.curapp.author : 'chavy.box.js'" no-data-text="未实现" dense hide-details solo> </v-autocomplete>
             <v-btn icon @click="ui.drawer.show = true">
-              <v-avatar size="24">
+              <v-avatar size="26">
                 <img :src="box.syscfgs.orz3.icon" :alt="box.syscfgs.orz3.repo" />
               </v-avatar>
             </v-btn>
           </v-app-bar>
+          <v-fab-transition>
+            <v-speed-dial v-show="ui.box.show && !box.usercfgs.isHideBoxIcon" fixed fab bottom :left="ui.drawer.show" :right="!ui.drawer.show" class="mb-12">
+              <template v-slot:activator>
+                <v-btn fab>
+                  <v-avatar size="48">
+                    <img :src="box.syscfgs.boxjs.icon" :alt="box.syscfgs.boxjs.repo" />
+                  </v-avatar>
+                </v-btn>
+              </template>
+              <v-btn fab small color="grey" @click="box.usercfgs.isHideBoxIcon = true, onUserCfgsChange()">
+                <v-icon>mdi-eye-off</v-icon>
+              </v-btn>
+              <v-btn fab small color="indigo" disabled>
+                <v-icon>mdi-database-import</v-icon>
+              </v-btn>
+              <v-btn fab small color="green" @click="" v-clipboard:copy="JSON.stringify(boxdat)" v-clipboard:success="onCopy">
+                <v-icon>mdi-export-variant</v-icon>
+              </v-btn>
+            </v-speed-dial>
+          </v-fab-transition>
           <v-navigation-drawer v-model="ui.drawer.show" app temporary right>
             <v-list dense nav>
               <v-list-item two-line dense @click="onLink(box.syscfgs.chavy.repo)">
@@ -496,11 +535,33 @@ function printHtml(data, curapp = null) {
               <v-divider></v-divider>
               <v-list-item>
                 <v-list-item-content>
-                  <v-switch label="透明图标" v-model="box.usercfgs.isTransparentIcons" @change="onIconChange"></v-switch>
+                  <v-switch label="透明图标" v-model="box.usercfgs.isTransparentIcons" @change="onUserCfgsChange"></v-switch>
                 </v-list-item-content>
                 <v-list-item-action @click="onLink(box.syscfgs.orz3.repo)">
-                  <v-avatar size="32"><img :src="box.syscfgs.orz3.icon" :alt="box.syscfgs.orz3.repo" /></v-avatar>
+                  <v-btn fab small text>
+                    <v-avatar size="32"><img :src="box.syscfgs.orz3.icon" :alt="box.syscfgs.orz3.repo" /></v-avatar>
+                  </v-btn>
                 </v-list-item-action>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-switch label="隐藏图标 (Box)" v-model="box.usercfgs.isHideBoxIcon" @change="onUserCfgsChange"></v-switch>
+                </v-list-item-content>
+                <v-list-item-action @click="onLink(box.syscfgs.boxjs.repo)">
+                  <v-btn fab small text>
+                    <v-avatar size="32"><img :src="box.syscfgs.boxjs.icon" :alt="box.syscfgs.boxjs.repo" /></v-avatar>
+                  </v-btn>
+                </v-list-item-action>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-switch label="调试模式 (数据)" v-model="box.usercfgs.isDebugData" @change="onUserCfgsChange"></v-switch>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-switch label="调试模式 (格式)" v-model="box.usercfgs.isDebugFormat" @change="onUserCfgsChange"></v-switch>
+                </v-list-item-content>
               </v-list-item>
             </v-list>
           </v-navigation-drawer>
@@ -560,7 +621,7 @@ function printHtml(data, curapp = null) {
                   </v-card-actions>
                 </template>
               </v-card>
-              <v-card class="mx-auto">
+              <v-card class="mx-auto" v-if="ui.curapp.datas && ui.curapp.datas.length > 0">
                 <v-subheader>
                   当前会话 ({{ ui.curapp.datas.length }})
                   <v-spacer></v-spacer>
@@ -643,7 +704,7 @@ function printHtml(data, curapp = null) {
               </v-dialog>
             </v-container>
           </v-content>
-          <v-bottom-navigation :value="ui.curview" app>
+          <v-bottom-navigation :value="ui.curview" app v-if="false">
             <v-btn value="home">
               <span>首页</span>
               <v-icon>mdi-home</v-icon>
@@ -676,6 +737,7 @@ function printHtml(data, curapp = null) {
           data() {
             return {
               ui: {
+                scrollY: 0,
                 bfview: 'app',
                 curview: 'app',
                 curapp: ${curapp},
@@ -684,12 +746,33 @@ function printHtml(data, curapp = null) {
                 impSessionDialog: { show: false, impval: '' },
                 snackbar: { show: false, text: '已复制!', timeout: 2000 },
                 appbar: { color: '' },
+                box: { show: false },
                 drawer: { show: false }
               },
               box: ${data}
             }
           },
-          computed: {},
+          computed: {
+            boxdat: function () {
+              const KEY_sessions = 'chavy_boxjs_sessions'
+              const KEY_sysCfgs = 'chavy_boxjs_sysCfgs'
+              const KEY_userCfgs = 'chavy_boxjs_userCfgs'
+              const KEY_sysApps = 'chavy_boxjs_sysApps'
+              const dat = {}
+              dat[KEY_sessions] = this.box.sessions
+              dat[KEY_sysCfgs] = this.box.syscfgs
+              dat[KEY_userCfgs] = this.box.usercfgs
+              dat[KEY_sysApps] = this.box.sysapps
+              this.box.sysapps.forEach((app, appIdx) => {
+                app.datas.forEach((data, dataIdx) => {
+                  if (![undefined, null].includes(data.val)) {
+                    dat[data.key] = data.val
+                  }
+                })
+              })
+              return dat
+            }
+          },
           watch: {
             'ui.curview': {
               handler(newval, oldval) {
@@ -700,6 +783,7 @@ function printHtml(data, curapp = null) {
                   var state = { title: 'BoxJs' }
                   document.title = state.title
                   history.pushState(state, '', '/home')
+                  this.$vuetify.goTo(this.ui.scrollY, {duration: 0, offset: 0})
                 }
               }
             }
@@ -708,7 +792,12 @@ function printHtml(data, curapp = null) {
             onLink(link) {
               window.open(link)
             },
-            onIconChange() {
+            onScroll(e) {
+              if(this.ui.curview === 'app') {
+                this.ui.scrollY = e.currentTarget.scrollY + 48
+              }
+            },
+            onUserCfgsChange() {
               axios.post('/api', JSON.stringify({ cmd: 'saveUserCfgs', val: this.box.usercfgs }))
             },
             goAppSessionView(app) {
@@ -792,6 +881,11 @@ function printHtml(data, curapp = null) {
             if (this.ui.curapp) {
               this.goAppSessionView(this.ui.curapp)
             }
+            if (!this.box.usercfgs.isHideBoxIcon) {
+              setTimeout(() => {
+                this.ui.box.show = true
+              }, 1000)
+            }
           }
         })
       </script>
@@ -806,4 +900,4 @@ function printJson() {
 }
 
 // prettier-ignore
-function Env(t){this.name=t,this.logs=[],this.isSurge=(()=>"undefined"!=typeof $httpClient),this.isQuanX=(()=>"undefined"!=typeof $task),this.log=((...t)=>{this.logs=[...this.logs,...t],t?console.log(t.join("\n")):console.log(this.logs.join("\n"))}),this.msg=((t=this.name,s="",i="")=>{this.isSurge()&&$notification.post(t,s,i),this.isQuanX()&&$notify(t,s,i);const e=["","==============\ud83d\udce3\u7cfb\u7edf\u901a\u77e5\ud83d\udce3=============="];t&&e.push(t),s&&e.push(s),i&&e.push(i),console.log(e.join("\n"))}),this.getdata=(t=>this.isSurge()?$persistentStore.read(t):this.isQuanX()?$prefs.valueForKey(t):void 0),this.setdata=((t,s)=>this.isSurge()?$persistentStore.write(t,s):this.isQuanX()?$prefs.setValueForKey(t,s):void 0),this.get=((t,s)=>this.send(t,"GET",s)),this.wait=((t,s=t)=>i=>setTimeout(()=>i(),Math.floor(Math.random()*(s-t+1)+t))),this.post=((t,s)=>this.send(t,"POST",s)),this.send=((t,s,i)=>{if(this.isSurge()){const e="POST"==s?$httpClient.post:$httpClient.get;e(t,(t,s,e)=>{s&&(s.body=e,s.statusCode=s.status),i(t,s,e)})}this.isQuanX()&&(t.method=s,$task.fetch(t).then(t=>{t.status=t.statusCode,i(null,t,t.body)},t=>i(t.error,t,t)))}),this.done=((t={})=>$done(t))}
+function Env(s){this.name=s,this.data=null,this.logs=[],this.isSurge=(()=>"undefined"!=typeof $httpClient),this.isQuanX=(()=>"undefined"!=typeof $task),this.isNode=(()=>"undefined"!=typeof module&&!!module.exports),this.log=((...s)=>{this.logs=[...this.logs,...s],s?console.log(s.join("\n")):console.log(this.logs.join("\n"))}),this.msg=((s=this.name,t="",i="")=>{this.isSurge()&&$notification.post(s,t,i),this.isQuanX()&&$notify(s,t,i);const e=["","==============\ud83d\udce3\u7cfb\u7edf\u901a\u77e5\ud83d\udce3=============="];s&&e.push(s),t&&e.push(t),i&&e.push(i),console.log(e.join("\n"))}),this.getdata=(s=>{if(this.isSurge())return $persistentStore.read(s);if(this.isQuanX())return $prefs.valueForKey(s);if(this.isNode()){const t="box.dat";return this.fs=this.fs?this.fs:require("fs"),this.fs.existsSync(t)?(this.data=JSON.parse(this.fs.readFileSync(t)),this.data[s]):null}}),this.setdata=((s,t)=>{if(this.isSurge())return $persistentStore.write(s,t);if(this.isQuanX())return $prefs.setValueForKey(s,t);if(this.isNode()){const i="box.dat";return this.fs=this.fs?this.fs:require("fs"),!!this.fs.existsSync(i)&&(this.data=JSON.parse(this.fs.readFileSync(i)),this.data[t]=s,this.fs.writeFileSync(i,JSON.stringify(this.data)),!0)}}),this.wait=((s,t=s)=>i=>setTimeout(()=>i(),Math.floor(Math.random()*(t-s+1)+s))),this.get=((s,t)=>this.send(s,"GET",t)),this.post=((s,t)=>this.send(s,"POST",t)),this.send=((s,t,i)=>{if(this.isSurge()){const e="POST"==t?$httpClient.post:$httpClient.get;e(s,(s,t,e)=>{t&&(t.body=e,t.statusCode=t.status),i(s,t,e)})}this.isQuanX()&&(s.method=t,$task.fetch(s).then(s=>{s.status=s.statusCode,i(null,s,s.body)},s=>i(s.error,s,s))),this.isNode()&&(this.request=this.request?this.request:require("request"),s.method=t,s.gzip=!0,this.request(s,(s,t,e)=>{t&&(t.status=t.statusCode),i(null,t,e)}))}),this.done=((s={})=>this.isNode()?null:$done(s))}
