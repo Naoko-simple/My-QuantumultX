@@ -15,7 +15,7 @@ if ($request && $request.method != 'OPTIONS' && $request.url.indexOf('querySigni
   if (tokenurlVal) chavy.setdata(tokenurlVal, tokenurlKey)
   if (tokenheaderVal) chavy.setdata(tokenheaderVal, tokenheaderKey)
   chavy.msg(cookieName, `获取刷新链接: 成功`, ``)
-} else if ($request && $request.method != 'OPTIONS' && $request.url.endsWith('daySign') >= 0) {
+} else if ($request && $request.method != 'OPTIONS' && $request.url.indexOf('daySign') >= 0) {
   const signurlVal = $request.url
   const signheaderVal = JSON.stringify($request.headers)
   if (signurlVal) chavy.setdata(signurlVal, signurlKey)
@@ -23,7 +23,9 @@ if ($request && $request.method != 'OPTIONS' && $request.url.indexOf('querySigni
   chavy.msg(cookieName, `获取Cookie: 成功 (每日签到)`, ``)
 } else if ($request && $request.method != 'OPTIONS' && $request.url.indexOf('userLogin') >= 0) {
   const loginlotteryurlVal = $request.url
-  const loginlotteryheaderVal = JSON.stringify($request.headers)
+  var loginlotteryheaderVal = $request.headers
+  if (loginlotteryheaderVal.hasOwnProperty('Content-Length')) delete loginlotteryheaderVal['Content-Length']
+  loginlotteryheaderVal = JSON.stringify(loginlotteryheaderVal)
   if (loginlotteryurlVal) chavy.setdata(loginlotteryurlVal, loginlotteryurlKey)
   if (loginlotteryheaderVal) chavy.setdata(loginlotteryheaderVal, loginlotteryheaderKey)
   chavy.msg(cookieName, `获取Cookie: 成功 (登录抽奖)`, ``)
