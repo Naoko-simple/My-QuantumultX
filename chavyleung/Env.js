@@ -65,7 +65,67 @@ function Env(name, opts) {
       }
     }
 
+    lodash_get(source, path, defaultValue = undefined) {
+      const paths = path.replace(/\[(\d+)\]/g, '.$1').split('.')
+      let result = source
+      for (const p of paths) {
+        result = Object(result)[p]
+        if (result === undefined) {
+          return defaultValue
+        }
+      }
+      return result
+    }
+
+    lodash_set(obj, path, value) {
+      if (Object(obj) !== obj) return obj
+      if (!Array.isArray(path)) path = path.toString().match(/[^.[\]]+/g) || []
+      path.slice(0, -1).reduce((a, c, i) => (Object(a[c]) === a[c] ? a[c] : (a[c] = Math.abs(path[i + 1]) >> 0 === +path[i + 1] ? [] : {})), obj)[path[path.length - 1]] = value
+      return obj
+    }
+
     getdata(key) {
+      let val = this.getval(key)
+      // 如果以 @
+      if (/^@/.test(key)) {
+        const [, objkey, paths] = /^@(.*?)\.(.*?)$/.exec(key)
+        const objval = objkey ? this.getval(objkey) : ''
+        if (objval) {
+          try {
+            const objedval = JSON.parse(objval)
+            val = objedval ? this.lodash_get(objedval, paths, '') : val
+          } catch (e) {
+            val = ''
+          }
+        }
+      }
+      return val
+    }
+
+    setdata(val, key) {
+      let issuc = false
+      if (/^@/.test(key)) {
+        const [, objkey, paths] = /^@(.*?)\.(.*?)$/.exec(key)
+        const objdat = this.getval(objkey)
+        const objval = objkey ? (objdat === 'null' ? null : objdat || '{}') : '{}'
+        try {
+          const objedval = JSON.parse(objval)
+          this.lodash_set(objedval, paths, val)
+          issuc = this.setval(JSON.stringify(objedval), objkey)
+          console.log(`${objkey}: ${JSON.stringify(objedval)}`)
+        } catch {
+          const objedval = {}
+          this.lodash_set(objedval, paths, val)
+          issuc = this.setval(JSON.stringify(objedval), objkey)
+          console.log(`${objkey}: ${JSON.stringify(objedval)}`)
+        }
+      } else {
+        issuc = $.setval(val, key)
+      }
+      return issuc
+    }
+
+    getval(key) {
       if (this.isSurge() || this.isLoon()) {
         return $persistentStore.read(key)
       } else if (this.isQuanX()) {
@@ -78,7 +138,7 @@ function Env(name, opts) {
       }
     }
 
-    setdata(val, key) {
+    setval(val, key) {
       if (this.isSurge() || this.isLoon()) {
         return $persistentStore.write(val, key)
       } else if (this.isQuanX()) {
@@ -90,6 +150,18 @@ function Env(name, opts) {
         return true
       } else {
         return (this.data && this.data[key]) || null
+      }
+    }
+
+    initGotEnv(opts) {
+      this.got = this.got ? this.got : require('got')
+      this.cktough = this.cktough ? this.cktough : require('tough-cookie')
+      this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar()
+      if (opts) {
+        opts.headers = opts.headers ? opts.headers : {}
+        if (undefined === opts.headers.Cookie && undefined === opts.cookieJar) {
+          opts.cookieJar = this.ckjar
+        }
       }
     }
 
@@ -115,14 +187,25 @@ function Env(name, opts) {
           (err) => callback(err)
         )
       } else if (this.isNode()) {
-        this.got = this.got ? this.got : require('got')
-        this.got(opts).then(
-          (resp) => {
-            const { statusCode: status, statusCode, headers, body } = resp
-            callback(null, { status, statusCode, headers, body }, body)
-          },
-          (err) => callback(err)
-        )
+        this.initGotEnv(opts)
+        this.got(opts)
+          .on('redirect', (resp, nextOpts) => {
+            try {
+              const ck = resp.headers['set-cookie'].map(this.cktough.Cookie.parse).toString()
+              this.ckjar.setCookieSync(ck, null)
+              nextOpts.cookieJar = this.ckjar
+            } catch (e) {
+              this.logErr(e)
+            }
+            // this.ckjar.setCookieSync(resp.headers['set-cookie'].map(Cookie.parse).toString())
+          })
+          .then(
+            (resp) => {
+              const { statusCode: status, statusCode, headers, body } = resp
+              callback(null, { status, statusCode, headers, body }, body)
+            },
+            (err) => callback(err)
+          )
       }
     }
 
@@ -150,7 +233,7 @@ function Env(name, opts) {
           (err) => callback(err)
         )
       } else if (this.isNode()) {
-        this.got = this.got ? this.got : require('got')
+        this.initGotEnv(opts)
         const { url, ..._opts } = opts
         this.got.post(url, _opts).then(
           (resp) => {
