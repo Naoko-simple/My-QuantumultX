@@ -1,12 +1,13 @@
 const $ = new Env('BoxJs')
 $.domain = '8.8.8.8'
 
-$.version = '0.2.4'
+$.version = '0.3.1'
 $.versionType = 'beta'
 $.KEY_sessions = 'chavy_boxjs_sessions'
 $.KEY_versions = 'chavy_boxjs_versions'
 $.KEY_userCfgs = 'chavy_boxjs_userCfgs'
 $.KEY_globalBaks = 'chavy_boxjs_globalBaks'
+$.KEY_curSessions = 'chavy_boxjs_cur_sessions'
 
 $.json = $.name
 $.html = $.name
@@ -218,62 +219,6 @@ function getSystemApps() {
       rewrites: [{ type: 'request', pattern: '^https://note.youdao.com/yws/mapi/user?method=checkin', script: 'noteyoudao.cookie.js', body: true }]
     },
     {
-      id: 'QTT',
-      name: '趣头条',
-      keys: ['senku_signKey_qtt', 'senku_signXTK_qtt', 'senku_readKey_qtt', 'senku_navCoinKey_qtt'],
-      author: '@GideonSenku',
-      repo: 'https://github.com/chavyleung/scripts/tree/master/qtt',
-      icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/qtt.png', 'https://raw.githubusercontent.com/Orz-3/task/master/qtt.png']
-    },
-    {
-      id: 'qmkg',
-      name: '全民K歌',
-      keys: ['senku_signurl_qmkg', 'senku_signheader_qmkg', 'senku_signbody_qmkg'],
-      author: '@GideonSenku',
-      repo: 'https://github.com/chavyleung/scripts/tree/master/qmkg',
-      icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/qmkg.png', 'https://raw.githubusercontent.com/Orz-3/task/master/qmkg.png']
-    },
-    {
-      id: 'bcz',
-      name: '百词斩',
-      keys: ['senku_cookie_bcz', 'senku_key_bcz'],
-      author: '@GideonSenku',
-      repo: 'https://github.com/chavyleung/scripts/tree/master/bcz',
-      icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/bcz.png', 'https://raw.githubusercontent.com/Orz-3/task/master/bcz.png']
-    },
-    {
-      id: 'zxhc',
-      name: '智行火车票',
-      keys: ['senku_signurl_zxhc', 'senku_signheader_zxhc', 'senku_signbody_zxhc'],
-      author: '@GideonSenku',
-      repo: 'https://github.com/chavyleung/scripts/tree/master/zxhc',
-      icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/zxhc.png', 'https://raw.githubusercontent.com/Orz-3/task/master/zxhc.png']
-    },
-    {
-      id: 'fenqile',
-      name: '分期乐',
-      keys: ['senku_signurl_fenqile', 'senku_signheader_fenqile', 'senku_signbody_fenqile', 'senku_signDailyKey_fenqile', 'senku_signDailyUrlKey_fenqile'],
-      author: '@GideonSenku',
-      repo: 'https://github.com/chavyleung/scripts/tree/master/fenqile',
-      icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/fenqile.png', 'https://raw.githubusercontent.com/Orz-3/task/master/fenqile.png']
-    },
-    {
-      id: 'fandeng',
-      name: '樊登读书',
-      keys: ['senku_signurl_pandeng', 'senku_signheader_pandeng', 'senku_signbody_pandeng'],
-      author: '@GideonSenku',
-      repo: 'https://github.com/chavyleung/scripts/tree/master/fandeng',
-      icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/fandeng.png', 'https://raw.githubusercontent.com/Orz-3/task/master/fandeng.png']
-    },
-    {
-      id: 'dbsj',
-      name: '豆瓣时间',
-      keys: ['senku_signurl_dbsj', 'senku_signheader_dbsj', 'senku_signbody_dbsj'],
-      author: '@GideonSenku',
-      repo: 'https://github.com/chavyleung/scripts/tree/master/dbsj',
-      icons: ['https://raw.githubusercontent.com/Orz-3/mini/master/dbsj.png', 'https://raw.githubusercontent.com/Orz-3/task/master/dbsj.png']
-    },
-    {
       id: 'txnews',
       name: '腾讯新闻',
       keys: ['sy_signurl_txnews', 'sy_cookie_txnews', 'sy_signurl_txnews2', 'sy_cookie_txnews2'],
@@ -396,8 +341,7 @@ function getSessions() {
 async function getVersions() {
   let vers = []
   await new Promise((resolve) => {
-    // const verurl = 'https://github.com/chavyleung/scripts/raw/master/box/release/box.release.json'
-    const verurl = 'https://gist.github.com/chavyleung/e1f1021391143c961d925bcdc21dca24/raw/4185a281c1861ceadd870ca55a497077ae6fefc2/box.release.json'
+    const verurl = 'https://github.com/chavyleung/scripts/raw/master/box/release/box.release.json'
     $.get({ url: verurl }, (err, resp, data) => {
       try {
         const _data = JSON.parse(data)
@@ -472,6 +416,8 @@ function handleApi() {
   // 应用会话
   else if (data.cmd === 'useSession') {
     $.log(`❕ ${$.name}, 应用会话!`)
+    const curSessionsstr = $.getdata($.KEY_curSessions)
+    const curSessions = ![undefined, null, 'null', ''].includes(curSessionsstr) ? JSON.parse(curSessionsstr) : {}
     const session = data.val
     const sessions = getSessions()
     const sessionIdx = sessions.findIndex((s) => session.id === s.id)
@@ -482,6 +428,8 @@ function handleApi() {
         const usesuc = $.setdata(`${newval}`, data.key)
         $.log(`❕ ${$.name}, 替换数据: ${data.key} ${usesuc ? '成功' : '失败'}!`, `旧值: ${oldval}`, `新值: ${newval}`)
       })
+      curSessions[session.appId] = session.id
+      $.setdata(JSON.stringify(curSessions), $.KEY_curSessions)
       $.subt = `应用会话: 成功 (${session.appName})`
       $.desc = []
       $.desc.push(`会话名称: ${session.name}`, `应用名称: ${session.appName}`, `会话编号: ${session.id}`, `应用编号: ${session.appId}`, `数据: ${JSON.stringify(session)}`)
@@ -658,7 +606,24 @@ function printHtml(data, curapp = null, curview = 'app') {
               </v-list>
             </v-menu>
             <v-btn icon @click="ui.curview = ui.bfview" v-else><v-icon>mdi-chevron-left</v-icon></v-btn>
-            <v-autocomplete :label="ui.curapp ? ui.curapp.name + ' ' + ui.curapp.author : 'BoxJs - v' + box.syscfgs.version" no-data-text="未实现" dense hide-details solo> </v-autocomplete>
+            <v-autocomplete v-model="ui.autocomplete.curapp" :items="apps" :filter="appfilter" :menu-props="{ closeOnContentClick: true, overflowY: true }" :label="ui.curapp ? ui.curapp.name + ' ' + ui.curapp.author : 'BoxJs - v' + box.syscfgs.version" no-data-text="未实现" dense hide-details solo>
+              <template v-slot:item="{ item }">
+                <v-list-item @click="goAppSessionView(item)">
+                  <v-list-item-avatar>
+                    <img :src="item.icons[box.usercfgs.isTransparentIcons ? 0 : 1]">
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ item.name }} ({{ item.id }})</v-list-item-title>
+                    <v-list-item-subtitle>{{ item.repo }}</v-list-item-subtitle>
+                    <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <v-btn icon v-if="item.isFav" @click.stop="onFav(item)"><v-icon color="yellow darken-2">mdi-star</v-icon></v-btn>
+                    <v-btn icon v-else @click.stop="onFav(item)"><v-icon color="grey">mdi-star-outline</v-icon></v-btn>
+                  </v-list-item-action>
+                </v-list-item>
+              </template>
+            </v-autocomplete>
             <v-btn icon @click="ui.drawer.show = true">
               <v-avatar size="26">
                 <img :src="box.syscfgs.orz3.icon" :alt="box.syscfgs.orz3.repo" />
@@ -1240,6 +1205,7 @@ function printHtml(data, curapp = null, curview = 'app') {
                 curappTabs: { curtab: 'sessions' },
                 curappSessions: null,
                 overlay: { show: false },
+                autocomplete: { curapp: null },
                 editProfileDialog: { show: false, bak: '' },
                 impGlobalBakDialog: { show: false, bak: '' },
                 reloadConfirmDialog: { show: false, title: '操作成功', message: '是否马上刷新页面?' },
@@ -1257,6 +1223,13 @@ function printHtml(data, curapp = null, curview = 'app') {
             }
           },
           computed: {
+            apps: function () {
+              const apps = []
+              apps.push(...this.box.sysapps)
+              this.box.appsubs.forEach((sub, subIdx) => apps.push(...sub.apps))
+              apps.sort((a, b) => a.id.localeCompare(b.id))
+              return apps
+            },
             appcnt: function () {
               let cnt = 0
               cnt += Array.isArray(this.box.sysapps) ? this.box.sysapps.length : 0
@@ -1370,6 +1343,9 @@ function printHtml(data, curapp = null, curview = 'app') {
             }
           },
           methods: {
+            appfilter(item, queryText, itemText) {
+              return item.id.includes(queryText) || item.name.includes(queryText)
+            },
             onLink(link) {
               window.open(link)
             },
