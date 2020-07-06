@@ -10,6 +10,16 @@ Surge 4.0:
 新浪新闻 = type=http-request,pattern=https:\/\/newsapi\.sina\.cn\/\?resource=userpoint\/signIn,script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/sinanews.js
 
 ------------------
+Loon 2.1.0+
+[Script]
+# 本地脚本
+cron "04 00 * * *" script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/sinanews.js, enabled=true, tag=新浪新闻
+
+http-request https:\/\/newsapi\.sina\.cn\/\?resource=hbpage&newsId=HB-1-sina_gold_center script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/sinanews.js
+
+http-request https:\/\/newsapi\.sina\.cn\/\?resource=userpoint\/signIn script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/sinanews.js
+
+-----------------
 
 #QX 1.0.7+ :
 [task_local]
@@ -18,8 +28,11 @@ Surge 4.0:
 https:\/\/newsapi\.sina\.cn\/\?resource=hbpage&newsId=HB-1-sina_gold_center url script-request-header sinanews.js
 https:\/\/newsapi\.sina\.cn\/\?resource=userpoint\/signIn url script-request-header sinanews.js
 
+~~~~~~~~~~~~~~~~~~
+
 [MITM]
 hostname = newsapi.sina.cn
+
 ~~~~~~~~~~~~~~~~
 ＃新浪新闻极速版配置
 
@@ -91,7 +104,7 @@ function getsign() {
      let result = JSON.parse(data)
      if (result.status == 0){
          signres = `签到成功🎉`
-         detail = `获得收益: ${result.data.message.title}💰\n`  
+         detail = `获得收益: ${result.data.message.title}💰，`  
          }  
      else if (result.status == -1){
          signres = `今日`+ result.msg
@@ -101,6 +114,7 @@ function getsign() {
          signres = `签到失败❌`
          detail = `说明: `+ result.msg
          sy.msg(CookieName,signres,detail)
+         return
          }
     resolve()
     })
@@ -112,7 +126,7 @@ function signinfo() {
       url: infourlVal,
       headers: JSON.parse(infoheaderVal)}
    sy.get(infourl, (error, response, data) => {
-     sy.log(`${CookieName}, data: ${data}`)
+     //sy.log(`${CookieName}, data: ${data}`)
      let result = JSON.parse(data)
      const nickName = `用户昵称: ${result.data.nickName}`  
      if (result.status == 0){
