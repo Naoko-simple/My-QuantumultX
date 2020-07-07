@@ -1,4 +1,6 @@
 /*
+更新时间: 2020-06-28 16:25
+
 本脚本仅适用于微博每日签到  
 获取Cookie方法:
 1.将下方[rewrite_local]和[MITM]地址复制的相应的区域下
@@ -22,6 +24,17 @@ weibo.js = type=http-request,pattern=https:\/\/api\.weibo\.cn\/\d\/video\/machin
 weibo.js = type=http-request,pattern=https:\/\/pay\.sc\.weibo\.com\/aj\/mobile\/home\/welfare\/signin\/do\?,script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/weibo.js
 
 ~~~~~~~~~~~~~~~~
+Loon 2.1.0+
+[Script]
+# 本地脚本
+cron "04 00 * * *" script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/weibo.js, enabled=true, tag=新浪微博
+
+http-request https:\/\/api\.weibo\.cn\/\d\/video\/machine\?gsid script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/weibo.js
+
+http-request https:\/\/pay\.sc\.weibo\.com\/aj\/mobile\/home\/welfare\/signin\/do\? script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/weibo.js
+
+-----------------
+
 QX 1.0.6+ :
 [task_local]
 0 9 * * * weibo.js
@@ -33,7 +46,7 @@ https:\/\/api\.weibo\.cn\/\d\/video\/machine\?gsid url script-request-header wei
 https:\/\/pay\.sc\.weibo\.com\/aj\/mobile\/home\/welfare\/signin\/do\? url script-request-header weibo.js
 
 ~~~~~~~~~~~~~~~~
-QX or Surge [MITM]
+[MITM]
 hostname = api.weibo.cn, pay.sc.weibo.com
 ~~~~~~~~~~~~~~~~
 */
@@ -53,7 +66,7 @@ let isGetCookie = typeof $request !== `undefined`
 if (isGetCookie) {
    GetCookie()
 } else {
-   sign()
+   all()
 }
 
 function GetCookie() {
@@ -74,8 +87,16 @@ if ($request && $request.method != 'OPTIONS' && $request.url.match(/\/video\/mac
   sy.msg(CookieName, `获取微博钱包Cookie: 成功`, ``)}
 }
 
+async function all() 
+{ 
+  await getsign(),
+  await doCard(),
+  await Judgment()
+}
+
+
 //微博签到
-function sign() {
+function getsign() {
    return new Promise((resolve, reject) =>{
    let signurl =  {
       url: `https://api.weibo.cn/2/checkin/add?${token}`,
@@ -85,24 +106,48 @@ function sign() {
      let result = JSON.parse(data)
      if (result.status == 10000){
          subTitle = `微博签到成功`
-         detail = `连续签到${result.data.continuous}天，获得收益: ${result.data.desc}💰`  
+         detail = `【微博签到】连续签到${result.data.continuous}天，获得收益: ${result.data.desc}💰\n`  
          }  
      else if (result.errno == 30000){
-         subTitle = `微博: 重复签到`
-         detail = `签到说明: `+ result.errmsg
+         subTitle = `微博签到: 重复`
+         detail = ``
        }
      else if (result.status == 90005){
-         subTitle = `微博警告 ❗️`
-         detail = `签到说明: `+ result.msg
+         subTitle = ``
+         detail = `【微博签到】‼️`+ result.msg
        }
      else {
          subTitle = `签到失败❌`
          detail = `说明: `+ result.errmsg
-         }
-   Judgment()
-    },resolve)
+         sy.msg(CookieName, subTitle, detail)
+         return
+        }
+     resolve()
+    })
   })
 }
+
+function doCard() {
+  return new Promise((resolve, reject) =>{
+   let doCardurl =  {
+      url: `https://api.weibo.cn/2/!/ug/king_act_home?${token}`,
+      headers: {"User-Agent": `Weibo/41997 (iPhone; iOS 13.4.1; Scale/3.00)`}}
+  sy.get(doCardurl, (error, response, data) => {
+    //sy.log(`${CookieName}每日打卡, data: ${data}`)
+     let result = JSON.parse(data)
+      if (result.status ==10000){
+       nickname = "  昵称: "+result.data.user.nickname
+       signday = result.data.signin.title.split('<')[0]
+         detail += `【每日打卡】✅ `+ signday+'天 积分总计: '+result.data.user.energy+`\n`
+       }
+     else {
+         subTitle += `每日打卡失败❌`
+         }
+     resolve()
+     })
+  })
+}
+
 function Judgment() {
   if (payheaderVal !== undefined|null)
      {  
@@ -110,39 +155,45 @@ function Judgment() {
    }
 else {
    subTitle += `  微博钱包未获取Cookie❌`
-   sy.msg(CookieName, subTitle, detail)
+   sy.msg(CookieName+nickname, subTitle, detail)
+   return
    }
 }
 
 // 钱包签到
 function paysign() {
-   return new Promise((resolve, reject) =>{
+ return new Promise((resolve, reject) =>{
    if ( payheaderVal !== `undefined`){
     var time = new Date().getTime()
    let payurl =  {
       url: `https://pay.sc.weibo.com/aj/mobile/home/welfare/signin/do?_=${time}`,
      headers: JSON.parse(payheaderVal)}
-     sy.post(payurl, (error, response, data) => {
+sy.post(payurl, (error, response, data) => {
      sy.log(`${CookieName}钱包, data: ${data}`)
+   try{
      let result = JSON.parse(data)
      if (result.status == 1){
-         subTitle += `  钱包签到成功 🎉`
-         detail += `  钱包获取积分:`+ result.score+' 分'
+          detail += `【微博钱包】✅ +`+ result.score+' 分'
          }  
-     else if (result.status == 2){
-         subTitle += `   钱包: 重复签到`
-         //detail += `钱包: `+ result.msg
+     else if (result.code == 100000){
+         subTitle += `   微博钱包: 🔁 重复`
+         detail += ``
        }
      else {
-         subTitle = `钱包签到失败❌`
+         subTitle += `钱包签到失败❌`
          //detail += ` 钱包: `+result.msg
          }
-       sy.msg(CookieName, subTitle, detail)
-       })
+       sy.msg(CookieName+nickname, subTitle, detail)
+        }
+    catch(e){
+         sy.msg(CookieName+nickname, subTitle+`  钱包Cookie失效 ❎`, detail)
+       }
+     })
     }
   resolve()
   })
 }
+
 
 function init() {
   isSurge = () => {

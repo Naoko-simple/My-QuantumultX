@@ -1,4 +1,5 @@
 /*
+更新时间: 2020-06-08 20:45
 
 > 感谢 [@barry](https://t.me/barrymchen) 编写
 > 感谢 [@GideonSenku](https://github.com/GideonSenku) 对代码优化
@@ -20,23 +21,32 @@ Surge 4.0 :
 
 # 获取京东到家 Cookie.
 京东到家 = type=http-request,pattern=https:\/\/daojia\.jd\.com\/client\?_jdrandom=\d{13}&functionId=%2Fsignin,script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/jddj.js,
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+Loon 2.1.0+
+[Script]
+cron "04 00 * * *" script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/jddj.js, enabled=true, tag=京东到家
+
+http-request https:\/\/daojia\.jd\.com\/client\?_jdrandom=\d{13}&functionId=%2Fsignin script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/jddj.js
+
+---------------------
+
 QX 1.0.7+ :
 [task_local]
 0 9 * * * jddj.js
 
 [rewrite_local]
-# Get jddj cookie. QX 1.0.5(188+):
 https:\/\/daojia\.jd\.com\/client\?_jdrandom=\d{13}&functionId=%2Fsignin url script-request-header jddj.js
 ~~~~~~~~~~~~~~~~
-QX or Surge MITM = daojia.jd.com
+
+hostname = daojia.jd.com
+
 ~~~~~~~~~~~~~~~~
 
 task
 0 0 * * * jddj.js
 
 */
-
+const logs = 0   //日志开关
 const CookieName ='京东到家'
 const CookieKey = 'sy_cookie_dj'
 const sy = init()
@@ -84,7 +94,7 @@ function sign() {
     let url = {url: 'https://daojia.jd.com/client?functionId=signin%2FuserSigninNew&body=%7B%7D',
     headers: { Cookie:cookieVal}}   
     sy.get(url, (error, response, data) => {
-      sy.log(`${CookieName}, data: ${data}`)
+      if(logs) sy.log(`${CookieName}, data: ${data}`)
       let result = JSON.parse(data)
        if (result.code == 0) {
         //subTitle = `签到结果: 成功🎉`
@@ -93,12 +103,13 @@ function sign() {
     })
       let url2 = {url: `https://daojia.jd.com/client?functionId=signin%2FshowSignInMsgNew&body=%7B%7D`, headers: { Cookie:cookieVal}}   
       sy.get(url2, (error, response, data) => {
-      sy.log(`${CookieName}, data: ${data}`)
+      if(logs)sy.log(`${CookieName}, data: ${data}`)
       let result = JSON.parse(data)
       if (result.code != 0) {
       subTitle = `签到结果: 失败`
       detail = `说明: ${result.msg}`
       sy.msg(title, subTitle, detail)
+      return
     } else if (result.result.userInfoResponse.hasSign == true) {    
     for (let i = 0; i < result.result.sevenDaysRewardResponse.items.length; i++){
     if (result.result.sevenDaysRewardResponse.items[i].day == result.result.sevenDaysRewardResponse.alreadySignInDays){
@@ -115,7 +126,7 @@ function sign() {
        } 
      }       
      sy.msg(title, subTitle, detail)
-     sy.log(`返回结果代码:${result.code}，返回信息:${result.msg}`)
+     sy.log(subTitle+`\n`+ detail)
    })
  }
 
