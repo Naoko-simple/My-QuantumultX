@@ -28,7 +28,7 @@ function Env(name, opts) {
     }
 
     loaddata() {
-      if (this.isNode) {
+      if (this.isNode()) {
         this.fs = this.fs ? this.fs : require('fs')
         this.path = this.path ? this.path : require('path')
         const curDirDataFilePath = this.path.resolve(this.dataFile)
@@ -47,7 +47,7 @@ function Env(name, opts) {
     }
 
     writedata() {
-      if (this.isNode) {
+      if (this.isNode()) {
         this.fs = this.fs ? this.fs : require('fs')
         this.path = this.path ? this.path : require('path')
         const curDirDataFilePath = this.path.resolve(this.dataFile)
@@ -265,12 +265,10 @@ function Env(name, opts) {
       const toEnvOpts = (rawopts) => {
         if (!rawopts || (!this.isLoon() && this.isSurge())) return rawopts
         if (typeof rawopts === 'string') {
-          this.logs.push('string')
           if (this.isLoon()) return rawopts
           else if (this.isQuanX()) return { 'open-url': rawopts }
           else return undefined
         } else if (typeof rawopts === 'object' && (rawopts['open-url'] || rawopts['media-url'])) {
-          this.logs.push('object')
           if (this.isLoon()) return rawopts['open-url']
           else if (this.isQuanX()) return rawopts
           else undefined
