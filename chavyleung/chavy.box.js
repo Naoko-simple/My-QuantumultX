@@ -1,7 +1,7 @@
 const $ = new Env('BoxJs')
 $.domain = '8.8.8.8'
 
-$.version = '0.4.10'
+$.version = '0.4.12'
 $.versionType = 'beta'
 $.KEY_sessions = 'chavy_boxjs_sessions'
 $.KEY_versions = 'chavy_boxjs_versions'
@@ -252,10 +252,9 @@ function getGlobalBaks() {
   return globalBaksStr ? JSON.parse(globalBaksStr) : []
 }
 
-async function refreshAppSub(sub) {
-  const usercfgs = getUserCfgs()
-  const suburl = sub.url.replace(/[ ]|[\r\n]/g, '')
-  await new Promise((resolve) => {
+function refreshAppSub(sub, usercfgs) {
+  return new Promise((resolve) => {
+    const suburl = sub.url.replace(/[ ]|[\r\n]/g, '')
     $.get({ url: suburl }, (err, resp, data) => {
       try {
         const respsub = JSON.parse(data)
@@ -278,15 +277,17 @@ async function refreshAppSub(sub) {
       }
     })
   })
-  $.setdata(JSON.stringify(usercfgs), $.KEY_userCfgs)
 }
 
 async function refreshAppSubs() {
   $.msg($.name, '更新订阅: 开始!')
   const usercfgs = getUserCfgs()
   for (let subIdx = 0; subIdx < usercfgs.appsubs.length; subIdx++) {
-    await refreshAppSub(usercfgs.appsubs[subIdx])
+    const sub = usercfgs.appsubs[subIdx]
+    await refreshAppSub(sub, usercfgs)
   }
+  $.setdata(JSON.stringify(usercfgs), $.KEY_userCfgs)
+  console.log(`全部订阅, 完成!`)
   const endTime = new Date().getTime()
   const costTime = (endTime - $.startTime) / 1000
   $.msg($.name, `更新订阅: 完成! 🕛 ${costTime} 秒`)
@@ -515,8 +516,8 @@ async function handleApi() {
     const sub = data.val
     const usercfgs = getUserCfgs()
     usercfgs.appsubs.push(sub)
+    await refreshAppSub(sub, usercfgs)
     $.setdata(JSON.stringify(usercfgs), $.KEY_userCfgs)
-    await refreshAppSub(data.val)
     const endTime = new Date().getTime()
     const costTime = (endTime - $.startTime) / 1000
     $.msg($.name, `添加订阅: 完成! 🕛 ${costTime} 秒`)
@@ -575,7 +576,7 @@ async function handleApi() {
 }
 
 async function getBoxData() {
-  return {
+  const box = {
     sessions: getSessions(),
     versions: await getVersions(),
     sysapps: getSystemApps(),
@@ -586,6 +587,11 @@ async function getBoxData() {
     globalbaks: getGlobalBaks(),
     colors: getSystemThemes()
   }
+  const apps = []
+  apps.push(...box.sysapps)
+  box.appsubs.forEach((sub) => apps.push(...sub.apps))
+  box.usercfgs.favapps = box.usercfgs.favapps.filter((favappId) => apps.find((app) => app.id === favappId))
+  return box
 }
 
 async function handleHome() {
@@ -915,11 +921,11 @@ function printHtml(data, curapp = null, curview = 'app') {
                       <v-switch :label="setting.name" v-model="setting.val" :hint="setting.desc" :placeholder="setting.placeholder" v-else-if="setting.type === 'boolean'"></v-switch>
                       <v-textarea :label="setting.name" v-model="setting.val" :hint="setting.desc" :auto-grow="setting.autoGrow" :placeholder="setting.placeholder" v-else-if="setting.type === 'textarea'"></v-textarea>
                       <v-radio-group :label="setting.name" v-model="setting.val" :hint="setting.desc" :placeholder="setting.placeholder" v-else-if="setting.type === 'radios'">
-                        <v-radio :class="itemIdx === 0 ? 'mt-2' : ''" v-for="(item, itemIdx) in setting.items" :label="item.label" :value="item.key"></v-radio>
+                        <v-radio :class="itemIdx === 0 ? 'mt-2' : ''" v-for="(item, itemIdx) in setting.items" :label="item.label" :value="item.key" :key="item.key"></v-radio>
                       </v-radio-group>
                       <template v-else-if="setting.type === 'checkboxes'">
                         <label>{{ setting.name }}</label>
-                        <v-checkbox class="mt-0" :hide-details="itemIdx + 1 !== setting.items.length" v-model="setting.val" :label="item.label" :value="item.key" v-for="(item, itemIdx) in setting.items" multiple></v-checkbox>
+                        <v-checkbox class="mt-0" :hide-details="itemIdx + 1 !== setting.items.length" v-model="setting.val" :label="item.label" :value="item.key" v-for="(item, itemIdx) in setting.items" :key="item.key" multiple></v-checkbox>
                       </template>
                       <v-text-field :label="setting.name" v-model="setting.val" :hint="setting.desc" :placeholder="setting.placeholder" v-else="setting.type === 'text'"></v-text-field>
                     </template>
@@ -1715,15 +1721,6 @@ function printHtml(data, curapp = null, curview = 'app') {
             },
             onReload() {
               window.location.reload()
-              // const refreshsecs = this.box.usercfgs.refreshsecs
-              // const sec = [undefined, null, 'null', 'undefined', ''].includes(refreshsecs) ? 3 : refreshsecs * 1
-              // if (sec === 0) {
-              //   this.reload()
-              // } else {
-              //   this.ui.overlay.show = false
-              //   this.ui.reloadConfirmDialog.show = true
-              //   this.ui.reloadConfirmDialog.sec = sec
-              // }
             },
             onDelSession(session) {
               this.ui.overlay.show = true
