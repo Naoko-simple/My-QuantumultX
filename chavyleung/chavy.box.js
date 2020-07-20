@@ -1,7 +1,7 @@
 const $ = new Env('BoxJs')
 $.domain = '8.8.8.8'
 
-$.version = '0.4.15'
+$.version = '0.4.18'
 $.versionType = 'beta'
 $.KEY_sessions = 'chavy_boxjs_sessions'
 $.KEY_versions = 'chavy_boxjs_versions'
@@ -73,11 +73,26 @@ function getSystemCfgs() {
       icon: 'https://avatars3.githubusercontent.com/u/29748519',
       repo: 'https://github.com/chavyleung/scripts'
     },
+    senku: {
+      id: 'GideonSenku',
+      icon: 'https://avatars1.githubusercontent.com/u/39037656',
+      repo: 'https://github.com/GideonSenku'
+    },
     orz3: {
       id: 'Orz-3',
       icon: 'https://raw.githubusercontent.com/Orz-3/task/master/Orz-3.png',
       repo: 'https://github.com/Orz-3/'
     },
+    contributors: [
+      { id: 'danchaw', icon: 'https://avatars1.githubusercontent.com/u/33873206?s=60&v=4', repo: 'https://github.com/danchaw' },
+      { id: '0x959', icon: 'https://avatars3.githubusercontent.com/u/42092849?s=60&v=4', repo: 'https://github.com/0x959' },
+      { id: 'lcandy2', icon: 'https://avatars1.githubusercontent.com/u/45784494?s=60&v=4', repo: 'https://github.com/lcandy2' },
+      { id: 'lowking', icon: 'https://avatars0.githubusercontent.com/u/33308659?s=60&v=4', repo: 'https://github.com/lowking' },
+      { id: 'chouchoui', icon: 'https://avatars1.githubusercontent.com/u/14866249?s=60&v=4', repo: 'https://github.com/chouchoui' },
+      { id: 'evilbutcher', icon: 'https://avatars1.githubusercontent.com/u/62224738?s=60&v=4', repo: 'https://github.com/evilbutcher' },
+      { id: 'eegod', icon: 'https://avatars0.githubusercontent.com/u/9635792?s=60&v=4', repo: 'https://github.com/eegod' },
+      { id: 'KaytZ', icon: 'https://avatars2.githubusercontent.com/u/17397324?s=60&v=4', repo: 'https://github.com/KaytZ' }
+    ],
     boxjs: {
       id: 'BoxJs',
       show: false,
@@ -342,7 +357,6 @@ function wrapapps(apps) {
           if (![null, undefined].includes(valdat)) {
             setting.val = valdat ? valdat.split(',') : []
           }
-          console.log(setting.val)
         } else {
           setting.val = val || setting.val
         }
@@ -654,7 +668,7 @@ function printHtml(data, curapp = null, curview = 'app') {
       <title>BoxJs</title>
       <meta charset="utf-8" />
       <meta name="apple-mobile-web-app-capable" content="yes">
-      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
       <link rel="Bookmark" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
       <link rel="shortcut icon" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
       <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
@@ -664,6 +678,38 @@ function printHtml(data, curapp = null, curview = 'app') {
       <style>
         [v-cloak]{
           display: none
+        }
+        .v-bottom-navigation,
+        .v-bottom-sheet {
+          padding-bottom: constant(safe-area-inset-bottom);
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+        .v-bottom-navigation{
+          box-sizing: content-box;
+        }
+        .v-bottom-navigation button {
+          box-sizing: border-box;
+        }
+        .v-main.safe {
+          margin-bottom: 56px;
+          margin-bottom: calc(56px + constant(safe-area-inset-bottom));
+          margin-bottom: calc(56px + env(safe-area-inset-bottom));
+        }
+        .v-main .v-main__wrap {
+          padding-bottom: 68px;
+          padding-bottom: calc(68px + constant(safe-area-inset-bottom));
+          padding-bottom: calc(68px + env(safe-area-inset-bottom));
+        }
+        .v-main.safe .v-main__wrap {
+          padding-bottom: 68px;
+        }
+        .v-speed-dial {
+          bottom: calc(12px + constant(safe-area-inset-bottom));
+          bottom: calc(12px + env(safe-area-inset-bottom));
+        }
+        .v-speed-dial.has-nav {
+          bottom: calc(68px + constant(safe-area-inset-bottom));
+          bottom: calc(68px + env(safe-area-inset-bottom));
         }
       </style>
     </head>
@@ -715,7 +761,7 @@ function printHtml(data, curapp = null, curview = 'app') {
             </v-btn>
           </v-app-bar>
           <v-fab-transition>
-            <v-speed-dial v-show="ui.box.show && !box.usercfgs.isHideBoxIcon" fixed fab bottom direction="top" :left="ui.drawer.show || box.usercfgs.isLeftBoxIcon" :right="!box.usercfgs.isLeftBoxIcon === true" class="mb-12">
+            <v-speed-dial v-show="ui.box.show && !box.usercfgs.isHideBoxIcon" fixed fab bottom direction="top" :left="ui.drawer.show || box.usercfgs.isLeftBoxIcon" :right="!box.usercfgs.isLeftBoxIcon === true" :class="box.usercfgs.isHideNavi ? '' : 'has-nav'">
               <template v-slot:activator>
                 <v-btn fab>
                   <v-avatar size="48">
@@ -744,13 +790,28 @@ function printHtml(data, curapp = null, curview = 'app') {
           <v-navigation-drawer v-model="ui.drawer.show" app temporary right>
             <v-list dense nav>
               <v-list-item two-line dense @click="onLink(box.syscfgs.chavy.repo)">
-                <v-list-item-avatar>
-                  <img src="https://avatars3.githubusercontent.com/u/29748519?s=460&u=392a19e85465abbcb1791c9b8b32184a16e6795e&v=4" />
-                </v-list-item-avatar>
+                <v-list-item-avatar><img :src="box.syscfgs.chavy.icon" /></v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>{{ box.syscfgs.chavy.id }}</v-list-item-title>
                   <v-list-item-subtitle>{{ box.syscfgs.chavy.repo }}</v-list-item-subtitle>
                 </v-list-item-content>
+              </v-list-item>
+              <v-list-item two-line dense @click="onLink(box.syscfgs.senku.repo)">
+                <v-list-item-avatar><img :src="box.syscfgs.senku.icon" /></v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title>{{ box.syscfgs.senku.id }}</v-list-item-title>
+                  <v-list-item-subtitle>{{ box.syscfgs.senku.repo }}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item class="pt-1">
+                <v-row align="center" justify="start" no-gutters>
+                  <v-col v-for="(c, cIdx) in box.syscfgs.contributors" cols="2">
+                    <v-avatar class="ma-1" size="26" @click="onGoToRepo(c.repo)">
+                      <img :src="c.icon" />
+                    </v-avatar>
+                  </v-col>
+                </v-row>
               </v-list-item>
               <v-divider></v-divider>
               <v-list-item v-if="false">
@@ -822,7 +883,7 @@ function printHtml(data, curapp = null, curview = 'app') {
               </v-list-item>
             </v-list>
           </v-navigation-drawer>
-          <v-main :class="box.usercfgs.isHideNavi ? 'mb-0 pb-16' : 'mb-14 pb-16'">
+          <v-main :class="box.usercfgs.isHideNavi ? '' : 'safe'">
             <v-container fluid v-if="ui.curview === 'app'">
               <v-expansion-panels class="mx-auto" v-if="favapps.length > 0" multiple v-model="box.usercfgs.favapppanel">
                 <v-expansion-panel>
@@ -924,7 +985,7 @@ function printHtml(data, curapp = null, curview = 'app') {
                     <template v-for="(setting, settingIdx) in ui.curapp.settings">
                       <v-slider :label="setting.name" v-model="setting.val" :hint="setting.desc" :min="setting.min" :max="setting.max" thumb-label="always" :placeholder="setting.placeholder" v-if="setting.type === 'slider'"></v-slider>
                       <v-switch :label="setting.name" v-model="setting.val" :hint="setting.desc" :placeholder="setting.placeholder" v-else-if="setting.type === 'boolean'"></v-switch>
-                      <v-textarea :label="setting.name" v-model="setting.val" :hint="setting.desc" :auto-grow="setting.autoGrow" :placeholder="setting.placeholder" v-else-if="setting.type === 'textarea'"></v-textarea>
+                      <v-textarea :label="setting.name" v-model="setting.val" :hint="setting.desc" :auto-grow="setting.autoGrow" :placeholder="setting.placeholder" :rows="setting.rows" v-else-if="setting.type === 'textarea'"></v-textarea>
                       <v-radio-group :label="setting.name" v-model="setting.val" :hint="setting.desc" :placeholder="setting.placeholder" v-else-if="setting.type === 'radios'">
                         <v-radio :class="itemIdx === 0 ? 'mt-2' : ''" v-for="(item, itemIdx) in setting.items" :label="item.label" :value="item.key" :key="item.key"></v-radio>
                       </v-radio-group>
@@ -1074,7 +1135,7 @@ function printHtml(data, curapp = null, curview = 'app') {
                     </v-tooltip>
                     <v-btn icon @click="ui.addAppSubDialog.show = true"><v-icon color="green">mdi-plus-circle</v-icon></v-btn>
                   </v-subheader>
-                  <v-list-item two-line dense v-for="(sub, subIdx) in appsubs" :key="sub.id">
+                  <v-list-item two-line dense v-for="(sub, subIdx) in appsubs" :key="sub.id" @click="onGoToRepo(sub.repo)">
                     <v-list-item-avatar v-if="sub.icon"><v-img :src="sub.icon"></v-img></v-list-item-avatar>
                     <v-list-item-avatar v-else color="grey"><v-icon dark>mdi-account</v-icon></v-list-item-avatar>
                     <v-list-item-content>
@@ -1356,7 +1417,7 @@ function printHtml(data, curapp = null, curview = 'app') {
                 <v-card-text>
                   <p class="subtitle-1">【远程订阅】</p>
                   <p class="body-1">
-                    配置 (底栏) &gt; Rewrite &gt; 订阅Rewrite &gt; 添加 (右上角图标)
+                    配置 (底栏) &gt; 脚本 &gt; 订阅脚本 &gt; 添加 (右上角图标)
                     https://github.com/chavyleung/scripts/raw/master/loon.box.conf
                   </p>
                   <p class="body-2">最后重启 Loon 代理 (首页右上角的开关)</p>
@@ -1364,7 +1425,7 @@ function printHtml(data, curapp = null, curview = 'app') {
                 <v-divider></v-divider>
                 <v-card-text>
                   <p class="subtitle-1">【订阅更新】</p>
-                  <p class="body-1">配置 (底栏) &gt; Rewrite &gt; 订阅Rewrite &gt; 刷新 (右上角图标)</p>
+                  <p class="body-1">配置 (底栏) &gt; 脚本 &gt; 订阅脚本 &gt; 刷新 (右上角图标)</p>
                   <p class="body-2">最后重启 Loon 代理 (首页右上角的开关)</p>
                 </v-card-text>
               </v-card>
@@ -1807,6 +1868,9 @@ function printHtml(data, curapp = null, curview = 'app') {
                 _v2 = v2.split('.'),
                 _r = _v1[0] - _v2[0]
               return _r == 0 && v1 != v2 ? compareVersion(_v1.splice(1).join('.'), _v2.splice(1).join('.')) : _r
+            },
+            onGoToRepo(url) {
+              window.open(url)
             }
           },
           mounted: function () {
@@ -1845,4 +1909,4 @@ function printJson() {
 }
 
 // prettier-ignore
-function Env(t,s){return new class{constructor(t,s){this.name=t,this.data=null,this.dataFile="box.dat",this.logs=[],this.logSeparator="\n",this.startTime=(new Date).getTime(),Object.assign(this,s),this.log("",`\ud83d\udd14${this.name}, \u5f00\u59cb!`)}isNode(){return"undefined"!=typeof module&&!!module.exports}isQuanX(){return"undefined"!=typeof $task}isSurge(){return"undefined"!=typeof $httpClient}isLoon(){return"undefined"!=typeof $loon}loaddata(){if(!this.isNode())return{};{this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const t=this.path.resolve(this.dataFile),s=this.path.resolve(process.cwd(),this.dataFile),e=this.fs.existsSync(t),i=!e&&this.fs.existsSync(s);if(!e&&!i)return{};{const i=e?t:s;try{return JSON.parse(this.fs.readFileSync(i))}catch{return{}}}}}writedata(){if(this.isNode()){this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const t=this.path.resolve(this.dataFile),s=this.path.resolve(process.cwd(),this.dataFile),e=this.fs.existsSync(t),i=!e&&this.fs.existsSync(s),o=JSON.stringify(this.data);e?this.fs.writeFileSync(t,o):i?this.fs.writeFileSync(s,o):this.fs.writeFileSync(t,o)}}lodash_get(t,s,e){const i=s.replace(/\[(\d+)\]/g,".$1").split(".");let o=t;for(const t of i)if(o=Object(o)[t],void 0===o)return e;return o}lodash_set(t,s,e){return Object(t)!==t?t:(Array.isArray(s)||(s=s.toString().match(/[^.[\]]+/g)||[]),s.slice(0,-1).reduce((t,e,i)=>Object(t[e])===t[e]?t[e]:t[e]=Math.abs(s[i+1])>>0==+s[i+1]?[]:{},t)[s[s.length-1]]=e,t)}getdata(t){let s=this.getval(t);if(/^@/.test(t)){const[,e,i]=/^@(.*?)\.(.*?)$/.exec(t),o=e?this.getval(e):"";if(o)try{const t=JSON.parse(o);s=t?this.lodash_get(t,i,""):s}catch(t){s=""}}return s}setdata(t,s){let e=!1;if(/^@/.test(s)){const[,i,o]=/^@(.*?)\.(.*?)$/.exec(s),h=this.getval(i),a=i?"null"===h?null:h||"{}":"{}";try{const s=JSON.parse(a);this.lodash_set(s,o,t),e=this.setval(JSON.stringify(s),i),console.log(`${i}: ${JSON.stringify(s)}`)}catch{const s={};this.lodash_set(s,o,t),e=this.setval(JSON.stringify(s),i),console.log(`${i}: ${JSON.stringify(s)}`)}}else e=$.setval(t,s);return e}getval(t){return this.isSurge()||this.isLoon()?$persistentStore.read(t):this.isQuanX()?$prefs.valueForKey(t):this.isNode()?(this.data=this.loaddata(),this.data[t]):this.data&&this.data[t]||null}setval(t,s){return this.isSurge()||this.isLoon()?$persistentStore.write(t,s):this.isQuanX()?$prefs.setValueForKey(t,s):this.isNode()?(this.data=this.loaddata(),this.data[s]=t,this.writedata(),!0):this.data&&this.data[s]||null}initGotEnv(t){this.got=this.got?this.got:require("got"),this.cktough=this.cktough?this.cktough:require("tough-cookie"),this.ckjar=this.ckjar?this.ckjar:new this.cktough.CookieJar,t&&(t.headers=t.headers?t.headers:{},void 0===t.headers.Cookie&&void 0===t.cookieJar&&(t.cookieJar=this.ckjar))}get(t,s=(()=>{})){t.headers&&(delete t.headers["Content-Type"],delete t.headers["Content-Length"]),this.isSurge()||this.isLoon()?$httpClient.get(t,(t,e,i)=>{!t&&e&&(e.body=i,e.statusCode=e.status,s(t,e,i))}):this.isQuanX()?$task.fetch(t).then(t=>{const{statusCode:e,statusCode:i,headers:o,body:h}=t;s(null,{status:e,statusCode:i,headers:o,body:h},h)},t=>s(t)):this.isNode()&&(this.initGotEnv(t),this.got(t).on("redirect",(t,s)=>{try{const e=t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString();this.ckjar.setCookieSync(e,null),s.cookieJar=this.ckjar}catch(t){this.logErr(t)}}).then(t=>{const{statusCode:e,statusCode:i,headers:o,body:h}=t;s(null,{status:e,statusCode:i,headers:o,body:h},h)},t=>s(t)))}post(t,s=(()=>{})){if(t.body&&t.headers&&!t.headers["Content-Type"]&&(t.headers["Content-Type"]="application/x-www-form-urlencoded"),delete t.headers["Content-Length"],this.isSurge()||this.isLoon())$httpClient.post(t,(t,e,i)=>{!t&&e&&(e.body=i,e.statusCode=e.status,s(t,e,i))});else if(this.isQuanX())t.method="POST",$task.fetch(t).then(t=>{const{statusCode:e,statusCode:i,headers:o,body:h}=t;s(null,{status:e,statusCode:i,headers:o,body:h},h)},t=>s(t));else if(this.isNode()){this.initGotEnv(t);const{url:e,...i}=t;this.got.post(e,i).then(t=>{const{statusCode:e,statusCode:i,headers:o,body:h}=t;s(null,{status:e,statusCode:i,headers:o,body:h},h)},t=>s(t))}}msg(s=t,e="",i="",o){const h=t=>!t||!this.isLoon()&&this.isSurge()?t:"string"==typeof t?this.isLoon()?t:this.isQuanX()?{"open-url":t}:void 0:"object"==typeof t&&(t["open-url"]||t["media-url"])?this.isLoon()?t["open-url"]:this.isQuanX()?t:void 0:void 0;this.isSurge()||this.isLoon()?$notification.post(s,e,i,h(o)):this.isQuanX()&&$notify(s,e,i,h(o)),this.logs.push("","==============\ud83d\udce3\u7cfb\u7edf\u901a\u77e5\ud83d\udce3=============="),this.logs.push(s),e&&this.logs.push(e),i&&this.logs.push(i)}log(...t){t.length>0?this.logs=[...this.logs,...t]:console.log(this.logs.join(this.logSeparator))}logErr(t,s){const e=!this.isSurge()&&!this.isQuanX()&&!this.isLoon();e?$.log("",`\u2757\ufe0f${this.name}, \u9519\u8bef!`,t.stack):$.log("",`\u2757\ufe0f${this.name}, \u9519\u8bef!`,t.message)}wait(t){return new Promise(s=>setTimeout(s,t))}done(t=null){const s=(new Date).getTime(),e=(s-this.startTime)/1e3;this.log("",`\ud83d\udd14${this.name}, \u7ed3\u675f! \ud83d\udd5b ${e} \u79d2`),this.log(),(this.isSurge()||this.isQuanX()||this.isLoon())&&$done(t)}}(t,s)}
+function Env(t,s){return new class{constructor(t,s){this.name=t,this.data=null,this.dataFile="box.dat",this.logs=[],this.logSeparator="\n",this.startTime=(new Date).getTime(),Object.assign(this,s),this.log("",`\ud83d\udd14${this.name}, \u5f00\u59cb!`)}isNode(){return"undefined"!=typeof module&&!!module.exports}isQuanX(){return"undefined"!=typeof $task}isSurge(){return"undefined"!=typeof $httpClient}isLoon(){return"undefined"!=typeof $loon}loaddata(){if(!this.isNode())return{};{this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const t=this.path.resolve(this.dataFile),s=this.path.resolve(process.cwd(),this.dataFile),e=this.fs.existsSync(t),i=!e&&this.fs.existsSync(s);if(!e&&!i)return{};{const i=e?t:s;try{return JSON.parse(this.fs.readFileSync(i))}catch(t){return{}}}}}writedata(){if(this.isNode()){this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const t=this.path.resolve(this.dataFile),s=this.path.resolve(process.cwd(),this.dataFile),e=this.fs.existsSync(t),i=!e&&this.fs.existsSync(s),o=JSON.stringify(this.data);e?this.fs.writeFileSync(t,o):i?this.fs.writeFileSync(s,o):this.fs.writeFileSync(t,o)}}lodash_get(t,s,e){const i=s.replace(/\[(\d+)\]/g,".$1").split(".");let o=t;for(const t of i)if(o=Object(o)[t],void 0===o)return e;return o}lodash_set(t,s,e){return Object(t)!==t?t:(Array.isArray(s)||(s=s.toString().match(/[^.[\]]+/g)||[]),s.slice(0,-1).reduce((t,e,i)=>Object(t[e])===t[e]?t[e]:t[e]=Math.abs(s[i+1])>>0==+s[i+1]?[]:{},t)[s[s.length-1]]=e,t)}getdata(t){let s=this.getval(t);if(/^@/.test(t)){const[,e,i]=/^@(.*?)\.(.*?)$/.exec(t),o=e?this.getval(e):"";if(o)try{const t=JSON.parse(o);s=t?this.lodash_get(t,i,""):s}catch(t){s=""}}return s}setdata(t,s){let e=!1;if(/^@/.test(s)){const[,i,o]=/^@(.*?)\.(.*?)$/.exec(s),h=this.getval(i),a=i?"null"===h?null:h||"{}":"{}";try{const s=JSON.parse(a);this.lodash_set(s,o,t),e=this.setval(JSON.stringify(s),i),console.log(`${i}: ${JSON.stringify(s)}`)}catch(s){const h={};this.lodash_set(h,o,t),e=this.setval(JSON.stringify(h),i),console.log(`${i}: ${JSON.stringify(h)}`)}}else e=$.setval(t,s);return e}getval(t){return this.isSurge()||this.isLoon()?$persistentStore.read(t):this.isQuanX()?$prefs.valueForKey(t):this.isNode()?(this.data=this.loaddata(),this.data[t]):this.data&&this.data[t]||null}setval(t,s){return this.isSurge()||this.isLoon()?$persistentStore.write(t,s):this.isQuanX()?$prefs.setValueForKey(t,s):this.isNode()?(this.data=this.loaddata(),this.data[s]=t,this.writedata(),!0):this.data&&this.data[s]||null}initGotEnv(t){this.got=this.got?this.got:require("got"),this.cktough=this.cktough?this.cktough:require("tough-cookie"),this.ckjar=this.ckjar?this.ckjar:new this.cktough.CookieJar,t&&(t.headers=t.headers?t.headers:{},void 0===t.headers.Cookie&&void 0===t.cookieJar&&(t.cookieJar=this.ckjar))}get(t,s=(()=>{})){t.headers&&(delete t.headers["Content-Type"],delete t.headers["Content-Length"]),this.isSurge()||this.isLoon()?$httpClient.get(t,(t,e,i)=>{!t&&e&&(e.body=i,e.statusCode=e.status,s(t,e,i))}):this.isQuanX()?$task.fetch(t).then(t=>{const{statusCode:e,statusCode:i,headers:o,body:h}=t;s(null,{status:e,statusCode:i,headers:o,body:h},h)},t=>s(t)):this.isNode()&&(this.initGotEnv(t),this.got(t).on("redirect",(t,s)=>{try{const e=t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString();this.ckjar.setCookieSync(e,null),s.cookieJar=this.ckjar}catch(t){this.logErr(t)}}).then(t=>{const{statusCode:e,statusCode:i,headers:o,body:h}=t;s(null,{status:e,statusCode:i,headers:o,body:h},h)},t=>s(t)))}post(t,s=(()=>{})){if(t.body&&t.headers&&!t.headers["Content-Type"]&&(t.headers["Content-Type"]="application/x-www-form-urlencoded"),delete t.headers["Content-Length"],this.isSurge()||this.isLoon())$httpClient.post(t,(t,e,i)=>{!t&&e&&(e.body=i,e.statusCode=e.status),s(t,e,i)});else if(this.isQuanX())t.method="POST",$task.fetch(t).then(t=>{const{statusCode:e,statusCode:i,headers:o,body:h}=t;s(null,{status:e,statusCode:i,headers:o,body:h},h)},t=>s(t));else if(this.isNode()){this.initGotEnv(t);const{url:e,...i}=t;this.got.post(e,i).then(t=>{const{statusCode:e,statusCode:i,headers:o,body:h}=t;s(null,{status:e,statusCode:i,headers:o,body:h},h)},t=>s(t))}}msg(s=t,e="",i="",o){const h=t=>!t||!this.isLoon()&&this.isSurge()?t:"string"==typeof t?this.isLoon()?t:this.isQuanX()?{"open-url":t}:void 0:"object"==typeof t&&(t["open-url"]||t["media-url"])?this.isLoon()?t["open-url"]:this.isQuanX()?t:void 0:void 0;this.isSurge()||this.isLoon()?$notification.post(s,e,i,h(o)):this.isQuanX()&&$notify(s,e,i,h(o)),this.logs.push("","==============\ud83d\udce3\u7cfb\u7edf\u901a\u77e5\ud83d\udce3=============="),this.logs.push(s),e&&this.logs.push(e),i&&this.logs.push(i)}log(...t){t.length>0?this.logs=[...this.logs,...t]:console.log(this.logs.join(this.logSeparator))}logErr(t,s){const e=!this.isSurge()&&!this.isQuanX()&&!this.isLoon();e?$.log("",`\u2757\ufe0f${this.name}, \u9519\u8bef!`,t.stack):$.log("",`\u2757\ufe0f${this.name}, \u9519\u8bef!`,t.message)}wait(t){return new Promise(s=>setTimeout(s,t))}done(t={}){const s=(new Date).getTime(),e=(s-this.startTime)/1e3;this.log("",`\ud83d\udd14${this.name}, \u7ed3\u675f! \ud83d\udd5b ${e} \u79d2`),this.log(),(this.isSurge()||this.isQuanX()||this.isLoon())&&$done(t)}}(t,s)}
