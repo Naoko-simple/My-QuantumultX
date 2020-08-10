@@ -3,10 +3,10 @@
 https://github.com/sazs34/TaskConfig/blob/master/assets/weather_pro.md
  */
 let config = {
-    darksky_api: "db79912c7f716548829b50aab01ed17e", //从https://darksky.net/dev/ 上申请key填入即可
-    aqicn_api: "df8924acde3f31bc7e47a6b91258aca9c4c46e5f", //从http://aqicn.org/data-platform/token/#/ 上申请key填入即可
-    huweather_apiKey: "6f92b94c86384062b930ab1f24d05641", //和风天气APIkey,可自行前往 https://dev.heweather.com/ 进行获取(注意key类型选WebApi)
-    lat_lon: "113.828307,34.537706", //请填写经纬度,直接从谷歌地图中获取即可
+    darksky_api: "填这里", //从https://darksky.net/dev/ 上申请key填入即可
+    aqicn_api: "填这里", //从http://aqicn.org/data-platform/token/#/ 上申请key填入即可
+    huweather_apiKey: "填这里", //和风天气APIkey,可自行前往 https://dev.heweather.com/ 进行获取(注意key类型选WebApi)
+    lat_lon: "填这里", //请填写经纬度,直接从谷歌地图中获取即可
     lang: "zh", //语言,随意切换为您想要的语言哦(zh/zh-tw/ja/en/fr/...)
     log: 0, //调试日志,0为不开启,1为开启,2为开启精简日志
     timeout: 0, //超时时间,单位毫秒(1000毫秒=1秒),一般不推荐修改[为0则不限制超时时间]
@@ -32,16 +32,16 @@ $[daily($[month]月$[day]日  $[temperatureLow]~$[temperatureHigh]°C  $[weather
             cw: false, //洗车指数,
             sport: false, //运动指数,
             trav: false, //旅游指数,
-            uv: true, //紫外线指数,
-            air: true, //空气污染扩散条件指数,
+            uv: false, //紫外线指数,
+            air: false, //空气污染扩散条件指数,
             ac: false, //空调开启指数,
             ag: false, //过敏指数,
             gl: false, //太阳镜指数,
             mu: false, //化妆指数,
             airc: false, //晾晒指数,
-            ptfc: true, //交通指数,
+            ptfc: false, //交通指数,
             fsh: false, //钓鱼指数,
-            spi: true, //防晒指数
+            spi: false, //防晒指数
         }
     }
 }
