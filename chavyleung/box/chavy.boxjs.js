@@ -1,6 +1,6 @@
 const $ = new Env('BoxJs')
 
-$.version = '0.7.0'
+$.version = '0.7.2'
 $.versionType = 'beta'
 
 // 存储`用户偏好`
@@ -98,7 +98,7 @@ function getDomain(url) {
  */
 async function handlePage() {
   const cache = $.getjson($.KEY_web_cache, null)
-  if (cache && cache.version === $.version) {
+  if (cache && cache.version !== $.version) {
     $.html = cache.cache
   } else {
     await $.http.get($.web).then(
@@ -430,10 +430,10 @@ async function apiRunScript() {
   const httpapi = $.getdata('@chavy_boxjs_userCfgs.httpapi')
   const ishttpapi = /.*?@.*?:[0-9]+/.test(httpapi)
   if ($.isSurge() && ishttpapi) {
-    const runOpts = { timeout: opts.script_timeout }
-    await $.getScript(opts.script_url).then((script) => $.runScript(script, runOpts))
+    const runOpts = { timeout: opts.timeout }
+    await $.getScript(opts.url).then((script) => $.runScript(script, runOpts))
   } else {
-    await $.getScript(opts.script_url).then((script) => {
+    await $.getScript(opts.url).then((script) => {
       // 避免被执行脚本误认为是 rewrite 环境
       // 所以需要 `$request = undefined`
       $request = undefined
