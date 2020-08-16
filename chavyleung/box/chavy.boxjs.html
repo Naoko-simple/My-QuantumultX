@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <link rel="Bookmark" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
     <link rel="shortcut icon" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/chavyleung/scripts/master/BOXJS.png" />
@@ -22,6 +22,16 @@
       body {
         padding-top: constant(safe-area-inset-top) !important;
         padding-top: env(safe-area-inset-top);
+      }
+      @media (prefers-color-scheme: light) {
+        body {
+          background-color: #fff;
+        }
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #121212;
+        }
       }
       .v-app-bar,
       .v-navigation-drawer__content {
@@ -44,6 +54,7 @@
         box-sizing: border-box;
       }
       .v-main.safe {
+        background: none;
         margin-bottom: 56px;
         padding-bottom: constant(safe-area-inset-bottom);
         padding-bottom: env(safe-area-inset-bottom);
@@ -60,7 +71,7 @@
   </head>
   <body>
     <div id="app" v-cloak>
-      <v-app v-if="box">
+      <v-app v-if="box" :style="appViewStyle">
         <v-snackbar top app v-model="ui.snackbar.show" v-bind="ui.snackbar">{{ui.snackbar.msg}}</v-snackbar>
         <!-- 头部 -->
         <v-app-bar app dense :color="isDarkMode || !isWebApp ? undefined : 'primary'">
@@ -89,7 +100,7 @@
             :label="`BoxJs - v${version}`"
             :filter="(item, queryText, itemText) => { return item.id.includes(queryText) || item.name.includes(queryText) }"
             color="primary"
-            no-data-text="无数据!"
+            hide-no-data
             hide-details
             solo
             dense
@@ -188,6 +199,20 @@
                 </v-select>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item class="mt-4" v-show="box.usercfgs.bgimgs">
+              <v-list-item-content>
+                <v-select
+                  hide-details
+                  v-model="box.usercfgs.bgimg"
+                  :items="bgimgs"
+                  item-text="name"
+                  item-value="url"
+                  @change="saveUserCfgs"
+                  label="背景图片"
+                >
+                </v-select>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item class="mt-4">
               <v-switch
                 dense
@@ -274,6 +299,21 @@
               <v-switch
                 dense
                 class="mt-0"
+                label="隐藏编码按钮"
+                hint="脚本编辑器的入口"
+                persistent-hint
+                v-model="box.usercfgs.isHideCoding"
+                @change="saveUserCfgs"
+              ></v-switch>
+              <v-spacer></v-spacer>
+              <v-btn fab small text>
+                <v-avatar size="32"><v-icon>mdi-code-tags</v-icon></v-avatar>
+              </v-btn>
+            </v-list-item>
+            <v-list-item class="mt-4">
+              <v-switch
+                dense
+                class="mt-0"
                 label="隐藏刷新按钮"
                 hint="双击悬浮按钮也可刷新页面"
                 persistent-hint
@@ -300,16 +340,41 @@
                 <v-avatar size="32"><v-icon>mdi-language-html5</v-icon></v-avatar>
               </v-btn>
             </v-list-item>
+            <v-list-item class="mt-4"></v-list-item>
           </v-list>
         </v-navigation-drawer>
         <!-- 主页 -->
         <v-main class="safe">
           <!-- 主页 -->
-          <v-container fluid v-if="view === ''" v-scroll="onScroll">
-            <!-- TODO -->
+          <v-container fluid v-show="view === ''" v-scroll="onScroll">
+            <v-row no-gutters>
+              <v-col cols="3" md="2" v-for="(app, appIdx) in favApps" :key="app.id" class="d-flex justify-space-around">
+                <div class="ma-2" @click="switchAppView(app.id)">
+                  <v-card v-if="isDarkMode" style="border-radius: 12px;">
+                    <v-img style="border-radius: 12px;" :aspect-ratio="1" width="54" height="54" contain v-ripple :src="app.icon"></v-img>
+                  </v-card>
+                  <v-img
+                    v-else
+                    style="border-radius: 12px;"
+                    :aspect-ratio="1"
+                    width="54"
+                    height="54"
+                    contain
+                    v-ripple
+                    class="elevation-3"
+                    :src="app.icon"
+                  ></v-img>
+                  <p class="text-center ma-0">
+                    <span class="d-inline-block text-truncate font-weight-bold" :style="appIconFontStyle">
+                      {{app.name}}
+                    </span>
+                  </p>
+                </div>
+              </v-col>
+            </v-row>
           </v-container>
           <!-- 应用列表 -->
-          <v-container fluid v-else-if="view === 'app' && !curapp" v-scroll="onScroll">
+          <v-container fluid v-show="view === 'app' && !curapp" v-scroll="onScroll">
             <!-- 收藏应用 -->
             <v-expansion-panels multiple class="mb-4" v-if="favApps.length > 0" v-model="box.usercfgs.favapppanel">
               <v-expansion-panel>
@@ -409,8 +474,21 @@
               </v-expansion-panel>
             </v-expansion-panels>
           </v-container>
+          <!-- 代码编辑 -->
+          <v-container fluid class="fill-height" v-show="view === 'coding'" v-scroll="onScroll">
+            <v-card flat style="width: inherit;">
+              <v-subheader>
+                <h2>脚本编辑器</h2>
+                <v-spacer></v-spacer>
+                <v-btn icon @click="exeScript">
+                  <v-icon color="primary">mdi-play-circle</v-icon>
+                </v-btn>
+              </v-subheader>
+            </v-card>
+            <div class="pa-0" id="container" style="width: inherit; height: inherit;"></div>
+          </v-container>
           <!-- 应用详情 -->
-          <v-container fluid v-else-if="view === 'app' && !!curapp" v-scroll="onScroll">
+          <v-container fluid v-if="view === 'app' && !!curapp" v-scroll="onScroll">
             <v-subheader>
               <h2>{{curapp.name}}</h2>
               <v-spacer></v-spacer>
@@ -452,7 +530,7 @@
                 <v-subheader>
                   应用设置 ({{curapp.settings.length}})
                 </v-subheader>
-                <v-form class="pl-4 pr-4">
+                <v-form class="pl-4 pr-4 pb-4">
                   <template v-for="(setting, settingIdx) in curapp.settings">
                     <v-slider
                       v-model="setting.val"
@@ -594,6 +672,10 @@
                         </v-card-actions>
                       </v-card>
                     </v-dialog>
+                    <v-divider></v-divider>
+                    <v-list-item @click="clearAppDatas()">
+                      <v-list-item-title>清空数据</v-list-item-title>
+                    </v-list-item>
                   </v-list>
                 </v-menu>
               </v-subheader>
@@ -673,15 +755,18 @@
           </v-container>
           <!-- 订阅列表 -->
           <v-container fluid v-else-if="view === 'sub'" v-scroll="onScroll">
-            <v-btn v-if="appSubs.length === 0" block class="primary" @click="addAppSubDialog = true">
-              添加订阅
-            </v-btn>
+            <template v-if="appSubs.length === 0">
+              <v-btn block class="primary" @click="addAppSubDialog = true">添加订阅</v-btn>
+              <v-btn block class="primary" @click="window.open('https://chavyleung.gitbook.io/boxjs/awesome/subscriptions')">
+                <v-icon class="mr-2">mdi-cloud</v-icon>进来看看
+              </v-btn>
+            </template>
             <v-card v-else>
               <v-list dense nav>
                 <v-subheader inset dense>
                   应用订阅 ({{appSubs.length}})
                   <v-spacer></v-spacer>
-                  <v-btn icon @click="window.open('https://app.gitbook.com/@chavyleung/s/boxjs/awesome/subscriptions')">
+                  <v-btn icon @click="window.open('https://chavyleung.gitbook.io/boxjs/awesome/subscriptions')">
                     <v-icon>mdi-cloud-circle</v-icon>
                   </v-btn>
                   <v-btn icon @click="reloadAppSub()">
@@ -847,6 +932,7 @@
               </template>
             </v-card>
           </v-container>
+          <!-- 备份详情 -->
           <v-container fluid v-else-if="view === 'bak' && !!curbak" v-scroll="onScroll">
             <v-subheader>
               <h2>{{curbak.name}}</h2>
@@ -883,7 +969,7 @@
           </v-container>
         </v-main>
         <!-- 底部 -->
-        <v-bottom-navigation app color="primary" :value="view">
+        <v-bottom-navigation app grow color="primary" :value="view">
           <v-btn @click="switchView('/')" value="">首页<v-icon>mdi-home</v-icon></v-btn>
           <v-btn @click="switchView('/app')" value="app">应用<v-icon>mdi-application</v-icon></v-btn>
           <v-btn @click="switchView('/sub')" value="sub">订阅<v-icon>mdi-database</v-icon></v-btn>
@@ -924,21 +1010,18 @@
                 {{box.usercfgs.isLeftBoxIcon ? 'mdi-format-horizontal-align-right' : 'mdi-format-horizontal-align-left'}}
               </v-icon>
             </v-btn>
-            <!-- <v-btn dark fab small color="indigo" @click="">
-              <v-icon>mdi-database-import</v-icon>
-            </v-btn>
-            <v-btn dark fab small color="success" @click="">
-              <v-icon>mdi-export-variant</v-icon>
-            </v-btn> -->
             <v-btn dark v-if="!box.usercfgs.isHideRefresh" fab small color="orange" @click="window.location.reload()">
               <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+            <v-btn dark v-if="!box.usercfgs.isHideCoding" fab small @click="path = '/coding'">
+              <v-icon>mdi-code-tags</v-icon>
             </v-btn>
           </v-speed-dial>
         </v-fab-transition>
         <v-bottom-sheet v-model="ui.versionsheet.show" scrollable>
           <v-card v-if="box.versions">
             <v-subheader>
-              <v-btn icon small @click="window.open('https://app.gitbook.com/@chavyleung/s/boxjs/base/upgrade')">
+              <v-btn icon small @click="window.open('https://chavyleung.gitbook.io/boxjs/base/upgrade')">
                 <v-icon>mdi-help-circle</v-icon>
               </v-btn>
               <v-spacer></v-spacer>
@@ -962,9 +1045,6 @@
             </v-card-text>
           </v-card>
         </v-bottom-sheet>
-        <!-- <v-overlay v-model="ui.overlay.show" :opacity="0.8">
-          <v-progress-circular indeterminate :value="ui.overlay.val" :size="64" color="primary"></v-progress-circular>
-        </v-overlay> -->
       </v-app>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.min.js"></script>
@@ -975,6 +1055,7 @@
     <script src="https://cdn.jsdelivr.net/npm/timeago.js@4.x/dist/timeago.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/uuid@8.x/dist/umd/uuidv4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-clipboard2@0.x/dist/vue-clipboard.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.20.0/min/vs/loader.js"></script>
     <script>
       new Vue({
         el: '#app',
@@ -1121,6 +1202,51 @@
             }
             return this.iconThemeIdx
           },
+          // 判断是否有壁纸
+          isWallpaper() {
+            return !!this.box.usercfgs.bgimg
+          },
+          // 是否存在多张壁纸
+          isMutiWallpaper() {
+            return this.bgimgs && this.bgimgs.length > 2
+          },
+          // 背景图片列表
+          bgimgs() {
+            const items = []
+            const bgimgs = this.box.usercfgs.bgimgs
+            if (bgimgs) {
+              bgimgs.split('\n').forEach((img) => {
+                const [name, url] = img.split(',')
+                items.push({ name, url })
+              })
+            }
+            return items
+          },
+          // 样式
+          appViewStyle() {
+            if (this.path !== '/') {
+              return null
+            }
+            const bgImg = this.box.usercfgs.bgimg
+            const style = {
+              'background-image': `url(${bgImg})`,
+              'background-position': 'center',
+              'background-size': 'cover',
+              'background-repeat': 'no-repeat'
+            }
+            return style
+          },
+          appIconFontStyle() {
+            const style = {
+              'font-size': '10px',
+              'max-width': '54px'
+            }
+            if (this.isWallpaper) {
+              style['color'] = '#fff'
+            }
+            return style
+          },
+          // 是否保存用户偏好
           isSaveUserCfgs: {
             set(val) {
               this.ui.isSaveUserCfgs = val
@@ -1256,6 +1382,46 @@
                 this.ui.bfview = bfview
                 this.ui.bfsubview = bfsubview
               }
+              if (newval === '/coding') {
+                require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.20.0/min/vs' } })
+                require(['vs/editor/editor.main'], () => {
+                  this.ui.editor = monaco.editor.create(document.getElementById('container'), {
+                    fontSize: 12,
+                    tabSize: 2,
+                    value: [
+                      '/** ',
+                      ' * 注意: ',
+                      ' * 在这里你可以使用完整的 EnvJs 环境',
+                      ' * ',
+                      ' * 同时: ',
+                      ' * 你`必须`手动调用 $done()',
+                      ' * ',
+                      ' * 因为: ',
+                      ' * BoxJs 不为主动执行的脚本调用 $done()',
+                      ' * 而把 $done 的时机完全交由脚本控制',
+                      ' * ',
+                      ' * 最后: ',
+                      ' * 这段脚本是可以直接运行的!',
+                      ' */ ',
+                      'const host = $.getdata("boxjs_host")',
+                      '$.json = {',
+                      '  msg: "这段 json 是返回给浏览器的!"',
+                      '}',
+                      '$.msg($.name, host)',
+                      '$.done()',
+                      '// $done() 或 $.done() 都可以'
+                    ].join('\n'),
+                    language: 'javascript',
+                    minimap: { enabled: false },
+                    theme: this.isDarkMode ? 'vs-dark' : 'vs'
+                  })
+                })
+              }
+              window.onresize = () => {
+                if (this.ui.editor) {
+                  this.ui.editor.layout()
+                }
+              }
               // 还原视图当时的滚动值
               const scrollY = this.ui.scrollY[this.path] || 0
               const offsetTop = -this.$vuetify.application.top
@@ -1269,6 +1435,15 @@
                 this.saveUserCfgs()
               }
               this.isSaveUserCfgs = true
+            }
+          },
+          'box.usercfgs.theme': {
+            handler() {
+              if (this.ui.editor) {
+                this.ui.editor._themeService.setTheme(this.isDarkMode ? 'vs-dark' : 'vs')
+              }
+              // 主题发生变化时给 <body> 设置背景色
+              document.querySelector('body').setAttribute('style', `background-color: ${this.isDarkMode ? '#121212' : '#fff'};`)
             }
           },
           'box.usercfgs.color_dark_primary': {
@@ -1288,10 +1463,13 @@
             this.isLoading = true
             return cfg
           })
-          axios.interceptors.response.use((resp) => {
-            this.isLoading = false
-            return resp
-          })
+          axios.interceptors.response.use(
+            (resp) => {
+              this.isLoading = false
+              return resp
+            },
+            (error) => (this.isLoading = false)
+          )
         },
         async created() {
           // 如果 url 参数中指定的 baseURL, 则后续的请求都请求到指定的域
@@ -1301,11 +1479,12 @@
             this.ui.isCors = true
           }
           // 根据路径跳转视图
+          const defview = '/'
           if (!this.isCors) {
             const path = location.pathname
-            this.path = path === '/' ? '/app' : path
+            this.path = path === '/' ? defview : path
           } else {
-            this.path = '/app'
+            this.path = defview
           }
           // 监听浏览器后退事件
           window.addEventListener('popstate', () => (this.path = path), false)
@@ -1375,7 +1554,7 @@
             this.$vuetify.theme.themes.light.primary = this.box.usercfgs.color_light_primary || '#F7BB0E'
             this.$vuetify.theme.themes.dark.primary = this.box.usercfgs.color_dark_primary || '#2196F3'
           },
-          // 复制文件
+          // 复制文本
           copy(str) {
             this.$copyText(str).then(
               (e) => {
@@ -1468,9 +1647,15 @@
             }
             app.isLoaded = true
           },
-          // 运行脚本
+          // 运行远程脚本
           runScript(url, timeout) {
-            const opts = { url, timeout }
+            const opts = { url, timeout, isRemote: true }
+            axios.post('/api/runScript', opts)
+          },
+          // 运行文本脚本
+          exeScript() {
+            const script = this.ui.editor.getValue()
+            const opts = { script }
             axios.post('/api/runScript', opts)
           },
           // 保存用户偏好
@@ -1564,8 +1749,12 @@
           // 保存应用数据
           clearAppDatas(key) {
             const datas = this.curapp.datas
-            const data = datas.find((data) => data.key === key)
-            data.val = ''
+            if (key) {
+              const data = datas.find((data) => data.key === key)
+              data.val = ''
+            } else {
+              datas.forEach((data) => (data.val = ''))
+            }
             axios.post('/api/save', datas).then((resp) => {
               if (this.curapp.id === 'BoxSetting') {
                 this.isSaveUserCfgs = false
